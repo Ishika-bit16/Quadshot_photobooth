@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact – Quadshot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=DM+Sans:wght@300;400;500&family=Courier+Prime&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body id="contact">
+
+  <!-- NAV -->
+  <nav id="navbar">
+
+    <div id="logo">Quadshot</div>
+    <div id="links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#snaps">Snaps</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </div>
+    <div id="rightnav"></div>
+
+  </nav>
+
+  <!-- CONTACT CARD -->
+  <div class="contact-card">
+
+    <!-- LEFT -->
+    <div class="left-panel">
+      <div id="left-panel-heading"><h2>Contact us</h2></div>
+      <div id="left-panel-para"><p>We love to hear your feedback about the Quadshot and memories you made with it</p></div>
+      <div id="left-panel-contact">
+          <div class="info-row">
+        <svg id="email-icon" width="16" height="16" fill="none" stroke="#FF8C8C" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+        <span id="email"><a href="mailto:ishikasogra@gmail.com">ishikasogra@gmail.com</a></span>
+      </div>
+
+      <div class="info-row">
+        <svg width="16" height="16" fill="none" stroke="#FF8C8C" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        <span>Gurugram, Haryana, India</span>
+      </div>
+      </div>
+
+
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="right-panel">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="nameField" placeholder="e.g. Ishika Sogra" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Feedback</label>
+        <textarea placeholder="Tell us about your experience with Quadshot…"></textarea>
+      </div>
+      <button class="btn-submit" onclick="handleSubmit()">Send Message</button>
+      <div class="success-msg" id="successMsg">✓ Thank you! Your message has been sent.</div>
+    </div>
+
+  </div>
+
+  <script>
+    function handleSubmit() {
+      const msg = document.getElementById('successMsg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 4000);
+    }
+  </script>
+</body>
+
+</html>

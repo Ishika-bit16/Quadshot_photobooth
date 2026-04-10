@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadshot-snaps</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="snap">
+    
+
+  <div class="card">
+  <div class="wordmark">
+   
+  </div>
+ 
+  <!-- viewfinder -->
+  <div class="viewfinder">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="flash" id="flash"></div>
+    <div class="countdown" id="countdown"></div>
+ 
+    <!-- camera start prompt -->
+    <div class="cam-prompt" id="camPrompt">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      <p>Camera access needed</p>
+      <button id="startCamBtn">Enable Camera</button>
+    </div>
+  </div>
+ 
+  <!-- filter row -->
+  <div class="filter-row">
+    <div class="filter-pill">
+      <button class="filter-btn active" data-filter="none"       title="Original">  <div class="swatch"></div></button>
+      <button class="filter-btn"        data-filter="grayscale"  title="B&W">       <div class="swatch"></div></button>
+      <button class="filter-btn"        data-filter="sepia"      title="Sepia">     <div class="swatch"></div></button>
+      <button class="filter-btn"        data-filter="saturate"   title="Vivid">     <div class="swatch"></div></button>
+      <button class="filter-btn"        data-filter="cool"       title="Cool">      <div class="swatch"></div></button>
+      <button class="filter-btn"        data-filter="invert"     title="Invert">    <div class="swatch"></div></button>
+    </div>
+  </div>
+ 
+  <!-- snap button -->
+  <div class="snap-wrap">
+    <button class="snap-btn" id="snapBtn" disabled>Snap</button>
+  </div>
+ 
+  <!-- photo strip -->
+  <div class="strip" id="strip"></div>
+</div>
+ 
+<!-- lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <img id="lbImg" src="" alt="snap" />
+  <a class="lb-dl" id="lbDl" download="snap.png">Download</a>
+</div>
+    
+</body>
+</html>
