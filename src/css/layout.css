@@ -1,0 +1,567 @@
+:root {
+    --white: #FFFFFF;
+    --coral: #FF8C8C;
+    --Pastel_Pink: #FFC8C8;
+    --very_light_pink: #FFE8E8;
+    --pippin: #FFE0E0;
+    --dark: #2a1a18;
+    --shadow: rgba(160, 70, 60, .18);
+
+
+    --input-border: var(--Pastel_Pink);
+    --input-bg: var(--very_light_pink);
+    --btn-bg: var(--pippin);
+    --btn-hover: var(--Pastel_Pink);
+    --card-shadow: 0 8px 40px var(--shadow);
+}
+
+
+
+
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center,
+            var(--white) 0%,
+            var(--coral) 0%,
+            var(--Pastel_Pink) 38%,
+            var(--very_light_pink) 74%,
+            var(--pippin) 100%);
+    font-family: 'Cormorant Garamond', serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+
+/* ── Outer wrapper — centers everything ── */
+.main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── NAVBAR ── */
+#navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 2.5rem auto;
+    width: min(1120px, calc(100% - 6rem));
+    max-width: 100%;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50px;
+    gap: 3rem;
+}
+
+#logo {
+    font-family: 'Great Vibes', cursive;
+    font-size: 1.8rem;
+    color: #c0504a;
+    letter-spacing: 0.02em;
+    min-width: 110px;
+}
+
+#logo a {
+    text-decoration: none;
+    color: #c0504a;
+}
+
+#links {
+    display: flex;
+    gap: 10rem;
+    list-style: none;
+}
+
+#links li {
+    list-style: none;
+}
+
+#links a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #6b3535;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: color 0.2s;
+}
+
+#links a:hover {
+    color: #FF8C8C;
+}
+
+#rightnav {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* GitHub icon */
+#rightnav::after {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 36px;
+    filter: brightness(0) saturate(100%) invert(26%) sepia(64%) saturate(370%) hue-rotate(305deg) brightness(108%) contrast(108%);
+
+    background: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* ── RESPONSIVE ── */
+
+/* Tablet (481–768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #navbar {
+        flex-wrap: wrap;
+        margin: 1rem auto;
+        width: calc(100% - 2rem);
+        gap: 0.75rem;
+        border-radius: 30px;
+        padding: 10px 16px;
+    }
+
+    #links { gap: 2.5rem; flex-wrap: wrap; justify-content: center; }
+}
+
+/* Phone (≤480px) */
+@media (max-width: 480px) {
+    #navbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 12px 14px;
+        border-radius: 16px;
+        margin: 0.6rem auto;
+        width: calc(100% - 1.2rem);
+    }
+
+    #logo { font-size: 1.5rem; min-width: unset; }
+
+    #links { gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    #links a { font-size: 0.9rem; }
+
+    #rightnav { display: none; }
+}
+/* ── HERO ── */
+#hero-section {
+    min-height: calc(60vw - 65vh);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 55px;
+}
+
+/* Center blob glow */
+#hero-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    width: 480px;
+    height: 380px;
+    background: radial-gradient(ellipse, rgba(220, 80, 80, 0.35) 0%, transparent 68%);
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(8px);
+}
+
+/* ── Scroll track + button wrapper ── */
+.frame-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 90vw;
+    max-width: 1000px;
+}
+
+/* ── Scroll buttons ── */
+.scroll-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--Pastel_Pink);
+    background: var(--btn-bg);
+    color: var(--dark);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.15s ease;
+    box-shadow: var(--card-shadow);
+    user-select: none;
+}
+
+.scroll-btn:hover {
+    background: var(--btn-hover);
+    transform: scale(1.08);
+}
+
+.scroll-btn:active {
+    transform: scale(0.96);
+}
+
+/* ── Scroll track ── */
+.frame {
+    display: flex;
+    height: 65vh;
+    flex: 1;
+    flex-direction: row;
+    gap: 1.6rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 1rem;
+    align-items: center;
+}
+
+.frame::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Base frame card ── */
+.frame>div {
+    flex: 0 0 180px;
+    border-radius: 14px;
+    overflow: auto;
+    cursor: pointer;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 300px;
+    transition: transform 0.2s ease, outline 0.15s ease;
+    outline: 2.5px solid transparent;
+    outline-offset: 3px;
+}
+
+
+.frame>div:hover {
+    transform: translateY(-5px);
+}
+
+.frame>div.selected {
+    outline-color: #ffffff;
+}
+
+
+/* ── Base slot ── */
+.slot {
+    flex: 1;
+    border-radius: 4px;
+}
+
+/* ════════════════════════════
+           FRAME 1 — Classic Black
+        ════════════════════════════ */
+#frame1 {
+    background: #000000;
+    position: relative;
+    padding-top: 26px;
+}
+
+#frame1::before {
+    content: '🪹CLASSIC';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #e3e3e3;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+#frame1 .slot {
+    background: #f5f0e8;
+    opacity: 0.35;
+}
+
+/* ════════════════════════════
+           FRAME 2 — Vintage Sepia
+        ════════════════════════════ */
+#frame2 {
+    background: #d0a3fa;
+}
+
+#frame2 .slot {
+    background: #49018c;
+    opacity: 0.45;
+}
+
+/* ════════════════════════════
+           FRAME 3 — Hama Film (2×2 grid)
+        ════════════════════════════ */
+#frame3 {
+    background: #1a1a1a;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    min-height: 300px;
+}
+
+#frame3 .slot {
+    background: #e8e0d0;
+    opacity: 0.38;
+    border-radius: 3px;
+    flex: unset;
+}
+
+/* ════════════════════════════
+           FRAME 4 — Cherry Red
+        ════════════════════════════ */
+#frame4 {
+    background: #8b1a1a;
+}
+
+#frame4 .slot {
+    background: #ffffff;
+    opacity: 0.4;
+    border-radius: 3px;
+}
+
+/* ════════════════════════════
+           FRAME 5 — Kawaii Pink
+        ════════════════════════════ */
+#frame5 {
+    background: #fce4f0;
+    position: relative;
+    padding-top: 26px;
+}
+
+#frame5::before {
+    content: '✦ cute ✦';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #e090c0;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+#frame5 .slot {
+    background: #ffb7d8;
+    opacity: 0.55;
+    border-radius: 6px;
+}
+
+/* ════════════════════════════
+           FRAME 6 — Hazel Leopard
+        ════════════════════════════ */
+#frame6 {
+    background:
+        radial-gradient(ellipse 7px 5px at 18% 12%, #6b4c2a 0%, transparent 100%),
+        radial-gradient(ellipse 9px 6px at 72% 38%, #4a3018 0%, transparent 100%),
+        radial-gradient(ellipse 6px 8px at 42% 68%, #6b4c2a 0%, transparent 100%),
+        radial-gradient(ellipse 8px 5px at 84% 82%, #4a3018 0%, transparent 100%),
+        radial-gradient(ellipse 7px 6px at 12% 58%, #6b4c2a 0%, transparent 100%),
+        radial-gradient(ellipse 5px 7px at 60% 20%, #4a3018 0%, transparent 100%),
+        #3d2b17;
+}
+
+#frame6 .slot {
+    background: #f0dcb4;
+    opacity: 0.38;
+}
+
+/* ════════════════════════════
+           FRAME 7 — Purikura Blue
+        ════════════════════════════ */
+#frame7 {
+    background: #0e2340;
+    border: 3px solid #3a6fc4;
+}
+
+#frame7 .slot {
+    background: #9ec8ff;
+    opacity: 0.4;
+}
+
+/* ════════════════════════════
+           FRAME 8 — Cream Dots
+        ════════════════════════════ */
+#frame8 {
+    background-color: #f5f0e3;
+    background-image: radial-gradient(circle, #b0a48c 1.2px, transparent 1.2px);
+    background-size: 10px 10px;
+}
+
+#frame8 .slot {
+    background: #3a3028;
+    opacity: 0.35;
+}
+
+/* ════════════════════════════════════════════════
+   LAYOUT PAGE – RESPONSIVE BREAKPOINTS
+   • Phone  : max-width 480px
+   • Tablet : 481px – 768px
+   • PC     : 769px+  (base styles)
+════════════════════════════════════════════════ */
+
+/* ── Shared: phone + tablet ── */
+@media (max-width: 768px) {
+
+    /* NAVBAR */
+    #navbar {
+        flex-wrap: wrap;
+        margin: 1rem auto;
+        width: calc(100% - 2rem);
+        gap: 0.75rem;
+        border-radius: 20px;
+        padding: 10px 16px;
+    }
+
+    #links {
+        gap: 1.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* FRAME WRAPPER */
+    .frame-wrapper {
+        width: calc(100% - 1.5rem);
+        gap: 0.5rem;
+    }
+
+    .scroll-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+
+    /* FRAME TRACK */
+    .frame {
+        height: 52vh;
+        gap: 1rem;
+    }
+
+    /* FRAME CARDS – narrower on small screens */
+    .frame>div {
+        flex: 0 0 140px;
+        min-height: 230px;
+        padding: 10px 9px;
+        border-radius: 10px;
+    }
+
+    #frame3 {
+        gap: 4px;
+    }
+}
+
+
+/* ══════════════════
+   TABLET  481–768 px
+══════════════════ */
+@media (min-width: 481px) and (max-width: 768px) {
+
+    #navbar {
+        border-radius: 28px;
+    }
+
+    #links {
+        gap: 2.2rem;
+    }
+
+    .frame {
+        height: 55vh;
+        gap: 1.2rem;
+    }
+
+    .frame>div {
+        flex: 0 0 155px;
+        min-height: 260px;
+    }
+}
+
+
+/* ══════════════════
+   PHONE  ≤ 480 px
+══════════════════ */
+@media (max-width: 480px) {
+
+    /* NAVBAR – stack vertically */
+    #navbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 12px 12px;
+        border-radius: 16px;
+        margin: 0.6rem auto;
+        width: calc(100% - 1.2rem);
+    }
+
+    #logo {
+        font-size: 1.5rem;
+        min-width: unset;
+    }
+
+    #links {
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    #links a {
+        font-size: 0.88rem;
+    }
+
+    #rightnav {
+        display: none;
+    }
+
+    /* FRAME WRAPPER */
+    .frame-wrapper {
+        width: calc(100% - 1rem);
+        gap: 0.35rem;
+    }
+
+    .scroll-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    /* FRAME TRACK */
+    .frame {
+        height: 46vh;
+        gap: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+
+    /* FRAME CARDS */
+    .frame>div {
+        flex: 0 0 118px;
+        min-height: 200px;
+        padding: 8px 7px;
+        border-radius: 9px;
+        gap: 4px;
+    }
+
+    #frame3 {
+        gap: 3px;
+    }
+
+    /* label text in frames */
+    #frame1::before,
+    #frame5::before {
+        font-size: 7.5px;
+        top: 6px;
+    }
+}
