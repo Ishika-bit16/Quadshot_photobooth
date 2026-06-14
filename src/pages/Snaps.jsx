@@ -105,7 +105,7 @@ export default function Snaps() {
   }, [cameraReady, isCounting, takeSnap])
 
   return (
-    <>
+    <div id="snap">
       <div>
         <Navbar />
       </div>
@@ -191,6 +191,6 @@ export default function Snaps() {
           <a className="lb-dl" href={lightbox.src} download={`quadshot-${lightbox.index}.png`}>Download</a>
         </div>
       )}
-    </>
+    </div>
   )
 }
