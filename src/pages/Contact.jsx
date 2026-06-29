@@ -29,8 +29,7 @@ export default function ContactForm() {
     try {
       const formData = new FormData();
 
-      // Replace this with your Web3Forms access key
-      formData.append("access_key", "c08b474f-272f-452f-83bf-b2be3a035501");
+   formData.append("access_key", "c08b474f-272f-452f-83bf-b2be3a035501");
 
       formData.append("name", form.name);
       formData.append("email", form.email);
@@ -170,12 +169,11 @@ export default function ContactForm() {
             {status === "sending" ? "Sending..." : "Send Message"}
           </button>
 
-          {status === "sent" ? (
-                <div className="contact-success">
-                  <span className="contact-success__icon">🌻</span>
-                  <p className="contact-success__msg">Message sent! I'll get back to you soon.</p>
-                </div>
-              ) : null}
+          {status === "sent" && (
+            <p className="success-msg">
+              ✅ Thank you! Your message has been sent successfully.
+            </p>
+          )}
 
           {status === "error" && (
             <p className="success-msg">
