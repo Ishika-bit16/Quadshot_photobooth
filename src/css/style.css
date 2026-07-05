@@ -1068,6 +1068,91 @@
 }
 
 
+@media (max-width: 768px) {
+
+  /* NAVBAR – collapse links to wrap neatly */
+  #navbar {
+    flex-wrap: wrap;
+    margin: 1rem auto;
+    width: calc(100% - 2rem);
+    gap: 0.75rem;
+    border-radius: 20px;
+    padding: 10px 16px;
+  }
+
+  #links {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* HERO */
+  #hero-section {
+    gap: 36px;
+    padding: 1rem 1rem 2rem;
+  }
+
+  #hero-section::before {
+    width: 280px;
+    height: 220px;
+  }
+
+  /* ABOUT page outer-card */
+  .outer-card {
+    margin: 24px auto;
+    width: calc(100% - 2rem);
+  }
+
+  /* CONTACT card – single column */
+  .contact-card {
+    grid-template-columns: 1fr;
+    max-width: 94vw;
+    padding: 28px 20px;
+  }
+
+  .left-panel {
+    margin: 0 0 18px 0;
+    align-items: center;
+    text-align: center;
+  }
+
+  .left-panel h2 { font-size: 1.75rem; }
+
+  .info-row { justify-content: center; }
+
+  /* SNAP page card */
+  #snap .card {
+    margin: 8px;
+    gap: 1.2rem;
+    padding: 0.5rem;
+  }
+
+  .viewfinder {
+    min-height: unset;
+    width: 100%;
+    aspect-ratio: 4/3;
+    margin-top: 0.8rem;
+  }
+
+  /* filter buttons – smaller on small screens */
+  .filter-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .filter-pill { gap: 4px; padding: 5px 8px; }
+
+  /* snap button */
+  .snap-btn { padding: 12px 40px; font-size: 1rem; }
+
+  /* strip thumbnails */
+  .snap-thumb { width: 66px; height: 46px; }
+
+  /* lightbox */
+  .lightbox img { max-width: 96vw; max-height: 72vh; }
+}
+
+
 /* ══════════════════
    TABLET  481–768 px
 ══════════════════ */
@@ -1178,4 +1263,229 @@
   /* countdown font smaller */
   .shot-number { font-size: 3.5rem; }
   .shot-label { font-size: 0.85rem; }
+}
+/* ═══════════════════════════════════════════════
+   STICKER PANEL & SNAP PAGE ENHANCEMENTS
+   (added for sticker drag-and-drop feature)
+═══════════════════════════════════════════════ */
+
+/* Sticker picker scrollbar */
+.sticker-grid::-webkit-scrollbar { width: 6px; }
+.sticker-grid::-webkit-scrollbar-track { background: transparent; }
+.sticker-grid::-webkit-scrollbar-thumb {
+  background: var(--Pastel_Pink);
+  border-radius: 3px;
+}
+
+/* Frame mini-picker tiles in Snaps page */
+.frame-thumb-mini {
+  width: 44px;
+  height: 110px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2.5px solid rgba(205,180,219,.5);
+  transition: all .15s;
+}
+.frame-thumb-mini.active {
+  border-color: #7c5b94;
+  box-shadow: 0 0 0 2px rgba(124,91,148,.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPOSED STRIP + STICKER SYSTEM  (Snaps page)
+════════════════════════════════════════════════════ */
+
+/* ── outer wrapper ── */
+.strip-composer {
+  width: 100%;
+  max-width: 520px;
+  margin: 1rem auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── the interactive photo strip card ── */
+.composed-strip {
+  position: relative;
+  width: 220px;
+  min-height: 580px;
+  border-radius: 18px;
+  border: 2px solid rgba(0,0,0,0.22);
+  box-shadow: 0 8px 32px rgba(120,90,160,.22);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 14px;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── individual photo slot ── */
+.composed-slot {
+  flex: 1;
+  background: rgba(255,255,255,0.55);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 116px;
+}
+.composed-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── frame decoration images overlaid on strip ── */
+.frame-deco-overlay {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  max-width: 55%;
+}
+
+/* ── user-placed stickers ── */
+.placed-sticker {
+  position: absolute;
+  cursor: grab;
+  z-index: 10;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow .1s;
+}
+.placed-sticker:active { cursor: grabbing; }
+.selected-sticker {
+  outline: 2px dashed var(--periwinkle);
+  outline-offset: 3px;
+  filter: drop-shadow(0 0 6px rgba(162,210,255,.7));
+}
+
+/* ── sticker controls bar ── */
+.sticker-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.sticker-toggle-btn {
+  background: var(--Pastel_Pink);
+  color: var(--dark);
+  border: 1.5px solid rgba(205,180,219,.7);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.sticker-toggle-btn:hover { background: var(--coral); }
+
+.sticker-ctrl-btn {
+  background: rgba(255,255,255,0.7);
+  border: 1.5px solid var(--Pastel_Pink);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s;
+}
+.sticker-ctrl-btn:hover { background: var(--pippin); }
+.sticker-del-btn { border-color: #f9a8a8; }
+.sticker-del-btn:hover { background: #ffe5e5; }
+
+.dl-btn {
+  background: linear-gradient(135deg, var(--periwinkle), var(--Pastel_Pink));
+  color: var(--dark);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 20px;
+  font-size: 0.87rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity .15s, transform .1s;
+  margin-left: auto;
+}
+.dl-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── sticker picker panel ── */
+.sticker-panel {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid var(--Pastel_Pink);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 6px 24px rgba(120,90,160,.12);
+}
+
+.sticker-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  justify-content: center;
+}
+.sticker-tab {
+  background: rgba(205,180,219,.25);
+  border: 1.5px solid rgba(205,180,219,.5);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .12s;
+}
+.sticker-tab.active,
+.sticker-tab:hover {
+  background: var(--Pastel_Pink);
+  border-color: var(--Pastel_Pink);
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sticker-thumb {
+  background: rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(205,180,219,.4);
+  border-radius: 10px;
+  padding: 4px;
+  cursor: pointer;
+  transition: transform .12s, border-color .12s;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sticker-thumb:hover {
+  transform: scale(1.1);
+  border-color: var(--coral);
+}
+.sticker-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── responsive tweaks for sticker panel ── */
+@media (max-width: 480px) {
+  .composed-strip { width: 180px; min-height: 460px; }
+  .sticker-grid { grid-template-columns: repeat(5, 1fr); max-height: 180px; }
+  .dl-btn { margin-left: 0; }
+  .sticker-controls { gap: 5px; }
 }

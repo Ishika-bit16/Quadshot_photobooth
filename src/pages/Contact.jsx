@@ -85,7 +85,7 @@ export default function ContactForm() {
                 width="16"
                 height="16"
                 fill="none"
-                stroke="#FF8C8C"
+                stroke="#FFAFCC"
                 strokeWidth="1.8"
                 viewBox="0 0 24 24"
               >
@@ -105,7 +105,7 @@ export default function ContactForm() {
                 width="16"
                 height="16"
                 fill="none"
-                stroke="#FF8C8C"
+                stroke="#FFAFCC"
                 strokeWidth="1.8"
                 viewBox="0 0 24 24"
               >

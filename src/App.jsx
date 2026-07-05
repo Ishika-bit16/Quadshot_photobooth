@@ -3,7 +3,7 @@ import Home from './pages/Home.jsx'
 import Layout from './pages/Layout.jsx'
 import Snaps from './pages/Snaps.jsx'
 import About from './pages/About.jsx'
-import Contact from './pages/contact.jsx'
+import Contact from './pages/Contact.jsx'
 
 export default function App() {
   return (
@@ -16,3 +16,4 @@ export default function App() {
     </Routes>
   )
 }
+

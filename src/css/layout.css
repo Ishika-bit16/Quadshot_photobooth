@@ -67,14 +67,14 @@ body {
 #logo {
     font-family: 'Great Vibes', cursive;
     font-size: 1.8rem;
-    color: #c0504a;
+    color: #7c5b94;
     letter-spacing: 0.02em;
     min-width: 110px;
 }
 
 #logo a {
     text-decoration: none;
-    color: #c0504a;
+    color: #7c5b94;
 }
 
 #links {
@@ -91,14 +91,14 @@ body {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.05rem;
     font-weight: 400;
-    color: #6b3535;
+    color: #5c4570;
     text-decoration: none;
     letter-spacing: 0.03em;
     transition: color 0.2s;
 }
 
 #links a:hover {
-    color: #FF8C8C;
+    color: #FFAFCC;
 }
 
 #rightnav {
@@ -174,7 +174,7 @@ body {
     transform: translate(-50%, -40%);
     width: 480px;
     height: 380px;
-    background: radial-gradient(ellipse, rgba(220, 80, 80, 0.35) 0%, transparent 68%);
+    background: radial-gradient(ellipse, rgba(205, 180, 219, 0.4) 0%, transparent 68%);
     pointer-events: none;
     border-radius: 50%;
     filter: blur(8px);
@@ -238,7 +238,7 @@ body {
 .frame>div {
     flex: 0 0 180px;
     border-radius: 14px;
-    overflow: auto;
+    overflow: visible;
     cursor: pointer;
     padding: 14px 12px;
     display: flex;
@@ -260,154 +260,109 @@ body {
 }
 
 
-/* ── Base slot ── */
+/* ── Base slot (legacy, kept for compatibility) ── */
 .slot {
     flex: 1;
     border-radius: 4px;
 }
 
-/* ════════════════════════════
-           FRAME 1 — Classic Black
-        ════════════════════════════ */
-#frame1 {
-    background: #000000;
-    position: relative;
-    padding-top: 26px;
-}
+/* ════════════════════════════════════════════════
+   REAL FRAME CARDS
+   Rendered by <Frame /> from src/assets/frames/frameData.js
+   — body color, rotation, slot layout, and decoration
+   sticker placement are all derived from the source
+   Frame_18.svg, not invented here.
+════════════════════════════════════════════════ */
 
-#frame1::before {
-    content: '🪹CLASSIC';
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    color: #e3e3e3;
-    letter-spacing: 0.12em;
-    white-space: nowrap;
-}
-
-#frame1 .slot {
-    background: #f5f0e8;
-    opacity: 0.35;
-}
-
-/* ════════════════════════════
-           FRAME 2 — Vintage Sepia
-        ════════════════════════════ */
-#frame2 {
-    background: #d0a3fa;
-}
-
-#frame2 .slot {
-    background: #49018c;
-    opacity: 0.45;
-}
-
-/* ════════════════════════════
-           FRAME 3 — Hama Film (2×2 grid)
-        ════════════════════════════ */
-#frame3 {
-    background: #1a1a1a;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 6px;
+.real-frame {
+    background: transparent !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible !important;
     min-height: 300px;
 }
 
-#frame3 .slot {
-    background: #e8e0d0;
-    opacity: 0.38;
-    border-radius: 3px;
-    flex: unset;
-}
-
-/* ════════════════════════════
-           FRAME 4 — Cherry Red
-        ════════════════════════════ */
-#frame4 {
-    background: #8b1a1a;
-}
-
-#frame4 .slot {
-    background: #ffffff;
-    opacity: 0.4;
-    border-radius: 3px;
-}
-
-/* ════════════════════════════
-           FRAME 5 — Kawaii Pink
-        ════════════════════════════ */
-#frame5 {
-    background: #fce4f0;
+.real-frame-body {
     position: relative;
-    padding-top: 26px;
+    width: 142px;
+    height: 398px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(0, 0, 0, 0.55);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
 }
 
-#frame5::before {
-    content: '✦ cute ✦';
+/* style A: continuous strip with thin divider bars (frame 1 geometry) */
+.real-frame-body.style-strip4 {
+    padding: 10px;
+}
+
+.real-frame-body.style-strip4 .real-frame-inner {
     position: absolute;
-    top: 8px;
+    inset: 10px;
+    background: var(--white);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px;
+}
+
+.real-frame-body.style-strip4 .real-frame-inner .real-slot {
+    flex: 1;
+    border-radius: 3px;
+    background: var(--very_light_pink);
+    opacity: 0.55;
+}
+
+/* style B: stacked polaroid-style cards (frames 2-8 geometry) */
+.real-frame-body.style-cards3 {
+    padding: 10px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.real-frame-body.style-cards3 .real-slot {
+    flex: 1;
+    background: var(--white);
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    opacity: 0.92;
+}
+
+/* decoration stickers placed by frameData.js coordinates, scaled to the card */
+.real-frame-deco {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.real-frame-deco img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.real-frame-label {
+    position: absolute;
+    bottom: -26px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 9px;
-    color: #e090c0;
-    letter-spacing: 0.12em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--dark);
     white-space: nowrap;
+    background: rgba(255, 255, 255, 0.75);
+    padding: 2px 10px;
+    border-radius: 999px;
 }
 
-#frame5 .slot {
-    background: #ffb7d8;
-    opacity: 0.55;
-    border-radius: 6px;
-}
-
-/* ════════════════════════════
-           FRAME 6 — Hazel Leopard
-        ════════════════════════════ */
-#frame6 {
-    background:
-        radial-gradient(ellipse 7px 5px at 18% 12%, #6b4c2a 0%, transparent 100%),
-        radial-gradient(ellipse 9px 6px at 72% 38%, #4a3018 0%, transparent 100%),
-        radial-gradient(ellipse 6px 8px at 42% 68%, #6b4c2a 0%, transparent 100%),
-        radial-gradient(ellipse 8px 5px at 84% 82%, #4a3018 0%, transparent 100%),
-        radial-gradient(ellipse 7px 6px at 12% 58%, #6b4c2a 0%, transparent 100%),
-        radial-gradient(ellipse 5px 7px at 60% 20%, #4a3018 0%, transparent 100%),
-        #3d2b17;
-}
-
-#frame6 .slot {
-    background: #f0dcb4;
-    opacity: 0.38;
-}
-
-/* ════════════════════════════
-           FRAME 7 — Purikura Blue
-        ════════════════════════════ */
-#frame7 {
-    background: #0e2340;
-    border: 3px solid #3a6fc4;
-}
-
-#frame7 .slot {
-    background: #9ec8ff;
-    opacity: 0.4;
-}
-
-/* ════════════════════════════
-           FRAME 8 — Cream Dots
-        ════════════════════════════ */
-#frame8 {
-    background-color: #f5f0e3;
-    background-image: radial-gradient(circle, #b0a48c 1.2px, transparent 1.2px);
-    background-size: 10px 10px;
-}
-
-#frame8 .slot {
-    background: #3a3028;
-    opacity: 0.35;
-}
 
 /* ════════════════════════════════════════════════
    LAYOUT PAGE – RESPONSIVE BREAKPOINTS
@@ -461,8 +416,9 @@ body {
         border-radius: 10px;
     }
 
-    #frame3 {
-        gap: 4px;
+    .real-frame-body {
+        width: 112px;
+        height: 314px;
     }
 }
 
@@ -488,6 +444,11 @@ body {
     .frame>div {
         flex: 0 0 155px;
         min-height: 260px;
+    }
+
+    .real-frame-body {
+        width: 124px;
+        height: 348px;
     }
 }
 
@@ -554,14 +515,15 @@ body {
         gap: 4px;
     }
 
-    #frame3 {
-        gap: 3px;
+    .real-frame-body {
+        width: 94px;
+        height: 264px;
+        border-radius: 14px;
     }
 
-    /* label text in frames */
-    #frame1::before,
-    #frame5::before {
-        font-size: 7.5px;
-        top: 6px;
+    .real-frame-label {
+        font-size: 0.68rem;
+        bottom: -22px;
+        padding: 2px 8px;
     }
 }
