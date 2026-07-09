@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './css/style.css'
 import './css/about.css'
-import './css/layout.css'
+import './css/snaps-decor-additions.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

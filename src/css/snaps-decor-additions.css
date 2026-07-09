@@ -1,0 +1,117 @@
+/* ── Append to your existing stylesheet ── */
+
+/* Camera + side thumbnail panel sit side by side */
+.camera-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.camera-layout .viewfinder {
+  flex: 1 1 auto;
+  min-width: 280px;
+}
+
+/* Side panel showing each captured shot as it comes in */
+.snaps-side-panel {
+  flex: 0 0 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.snaps-side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.snap-thumb-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.snap-thumb-wrap:hover {
+  transform: scale(1.03);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.snap-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.snap-review-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.retake-btn,
+.next-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retake-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.next-btn {
+  background: #6c5ce7;
+  color: #fff;
+}
+
+.retake-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.next-btn:hover { filter: brightness(1.08); }
+
+/* Lightbox retake/next row */
+.lb-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Decor page download row */
+.download-row {
+  flex-wrap: wrap;
+}
+
+.dl-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Stack side panel under the camera on small screens */
+@media (max-width: 640px) {
+  .camera-layout {
+    flex-direction: column;
+  }
+  .snaps-side-panel {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .snaps-side-list {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    max-height: none;
+  }
+  .snap-thumb-wrap {
+    flex: 0 0 90px;
+  }
+}

@@ -41,7 +41,7 @@ export default function Home() {
           </span>
         </div>
         <div id="button_one">
-          <button onClick={() => navigate('/layout')}>Take a photo</button>
+          <button onClick={() => navigate('/Snaps')}>Take a photo</button>
         </div>
       </div>
     </>

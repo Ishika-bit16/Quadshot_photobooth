@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 
 const FILTERS = {
@@ -14,9 +15,10 @@ const FILTER_KEYS = Object.keys(FILTERS)
 const TOTAL_SHOTS = 4
 
 export default function Snaps() {
-  const videoRef    = useRef(null)
-  const canvasRef   = useRef(null)
-  const flashRef    = useRef(null)
+  const videoRef  = useRef(null)
+  const canvasRef = useRef(null)
+  const flashRef  = useRef(null)
+  const navigate  = useNavigate()
 
   const [currentFilter, setCurrentFilter] = useState('none')
   const [cameraReady,   setCameraReady]   = useState(false)
@@ -35,10 +37,16 @@ export default function Snaps() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      videoRef.current.srcObject = stream
-      await videoRef.current.play()
+      const video = videoRef.current
+      video.srcObject = stream
+      // NOTE: loadedmetadata usually fires *before* play() resolves for a live
+      // stream, so attach the listener first and also check readyState as a
+      // fallback -- otherwise cameraReady can get stuck false forever and the
+      // Snap button never works even though the preview is visibly playing.
+      video.onloadedmetadata = () => setCameraReady(true)
+      await video.play()
       setCamPrompt(false)
-      videoRef.current.addEventListener('loadedmetadata', () => setCameraReady(true), { once: true })
+      if (video.readyState >= 1) setCameraReady(true)
     } catch (err) {
       alert('Could not access camera. Please allow camera permission in your browser settings.')
     }
@@ -72,6 +80,7 @@ export default function Snaps() {
     if (!cameraReady) { alert('Please enable the camera first!'); return }
     if (isCounting) return
     setSnaps([])
+    setLightbox(null)
     setIsCounting(true)
 
     let shotsTaken = 0
@@ -104,6 +113,20 @@ export default function Snaps() {
     runNextShot()
   }, [cameraReady, isCounting, takeSnap])
 
+  const stripDone = snaps.length === TOTAL_SHOTS
+
+  // Clear everything and shoot the sequence again from scratch.
+  const handleRetake = () => {
+    setLightbox(null)
+    capturePhoto()
+  }
+
+  // Hand the shots off to the decor/frame/sticker page.
+  const handleNext = () => {
+    if (!stripDone) return
+    navigate('/decor', { state: { snaps, filter: currentFilter } })
+  }
+
   return (
     <div id="snap">
       <div>
@@ -113,28 +136,56 @@ export default function Snaps() {
       <div className="card">
         <div className="wordmark"></div>
 
-        {/* Viewfinder */}
-        <div className="viewfinder">
-          <video ref={videoRef} id="video" autoPlay playsInline muted  />
-          <canvas ref={canvasRef} id="canvas" style={{ display: 'none' }} />
+        {/* Camera + live side thumbnail panel, side by side */}
+        <div className="camera-layout">
+          {/* Viewfinder */}
+          <div className="viewfinder">
+            <video ref={videoRef} id="video" autoPlay playsInline muted  />
+            <canvas ref={canvasRef} id="canvas" style={{ display: 'none' }} />
 
-          {/* Flash overlay */}
-          <div className="flash" ref={flashRef} id="flash"></div>
+            {/* Flash overlay */}
+            <div className="flash" ref={flashRef} id="flash"></div>
 
-          {/* Countdown */}
-          {countdown && (
-            <div className="countdown visible" id="countdown">
-              <span className="shot-label">{countdown.label}</span>
-              {countdown.number !== '' && <span className="shot-number">{countdown.number}</span>}
-            </div>
-          )}
+            {/* Countdown */}
+            {countdown && (
+              <div className="countdown visible" id="countdown">
+                <span className="shot-label">{countdown.label}</span>
+                {countdown.number !== '' && <span className="shot-number">{countdown.number}</span>}
+              </div>
+            )}
 
-          {/* Camera prompt */}
-          {camPrompt && (
-            <div className="cam-prompt" id="camPrompt">
-              <img id="camera" src="/assets/images/camera.png" alt="camera icon" className="cam-icon" />
-              <p>Camera access needed</p>
-              <button onClick={startCamera}>Enable Camera</button>
+            {/* Camera prompt */}
+            {camPrompt && (
+              <div className="cam-prompt" id="camPrompt">
+                <img id="camera" src="/assets/images/camera.png" alt="camera icon" className="cam-icon" />
+                <p>Camera access needed</p>
+                <button onClick={startCamera}>Enable Camera</button>
+              </div>
+            )}
+          </div>
+
+          {/* Side panel: photos appear here as each shot is taken */}
+          {snaps.length > 0 && (
+            <div className="snaps-side-panel">
+              <div className="snaps-side-list">
+                {snaps.map((src, i) => (
+                  <div key={i} className="snap-thumb-wrap">
+                    <img
+                      src={src}
+                      alt={`Snap ${i + 1}`}
+                      className="snap-thumb"
+                      onClick={() => setLightbox({ src, index: i + 1 })}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {stripDone && (
+                <div className="snap-review-actions">
+                  <button className="retake-btn" onClick={handleRetake}>↺ Retake</button>
+                  <button className="next-btn" onClick={handleNext}>Next →</button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -167,28 +218,19 @@ export default function Snaps() {
             Snap
           </button>
         </div>
-
-        {/* Photo strip */}
-        <div className={`strip${snaps.length ? ' has-photos' : ''}`} id="strip">
-          {snaps.map((src, i) => (
-            <div key={i} className="strip-item">
-              <img
-                src={src}
-                alt={`Snap ${i + 1}`}
-                className="snap-thumb"
-                onClick={() => setLightbox({ src, index: i + 1 })}
-              />
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox: clicking a captured photo shows it full-size with Retake / Next */}
       {lightbox && (
         <div className="lightbox open" id="lightbox" onClick={e => { if (e.target.id === 'lightbox') setLightbox(null) }}>
           <button className="lb-close" onClick={() => setLightbox(null)}>✕</button>
           <img src={lightbox.src} alt="snap" />
-          <a className="lb-dl" href={lightbox.src} download={`quadshot-${lightbox.index}.png`}>Download</a>
+          {stripDone && (
+            <div className="lb-actions">
+              <button className="retake-btn" onClick={handleRetake}>↺ Retake</button>
+              <button className="next-btn" onClick={handleNext}>Next →</button>
+            </div>
+          )}
         </div>
       )}
     </div>
