@@ -303,53 +303,56 @@ export default function Decor() {
             ))}
           </div>
 
-          {/* frame mini-picker */}
-          <div className="sticker-controls">
-            {FRAMES.map(f => (
-              <button
-                key={f.id}
-                className={`frame-thumb-mini${selectedFrame?.id === f.id ? ' active' : ''}`}
-                style={{ background: f.color }}
-                title={f.label}
-                onClick={() => pickFrame(f.id)}
-              />
-            ))}
-          </div>
-
-          <div className="sticker-controls">
-            <button className="sticker-toggle-btn" onClick={() => setShowStickerPanel(v => !v)}>
-              {showStickerPanel ? 'Close Stickers' : '✨ Add Stickers'}
-            </button>
-            {selectedStickerId && (
-              <>
-                <button className="sticker-ctrl-btn" onClick={() => rotateSticker(-15)} title="Rotate left">⟲</button>
-                <button className="sticker-ctrl-btn" onClick={() => rotateSticker(15)} title="Rotate right">⟳</button>
-                <button className="sticker-ctrl-btn sticker-del-btn" onClick={deleteSelectedSticker} title="Remove sticker">✕</button>
-              </>
-            )}
-          </div>
-
-          {showStickerPanel && (
-            <div className="sticker-panel">
-              <div className="sticker-grid">
-                {STICKERS.map(src => (
-                  <div key={src} className="sticker-thumb" onClick={() => addSticker(src)}>
-                    <img src={src} alt="sticker" />
-                  </div>
-                ))}
-              </div>
+          {/* everything to the right of the photo strip */}
+          <div className="decor-controls">
+            {/* frame mini-picker */}
+            <div className="sticker-controls">
+              {FRAMES.map(f => (
+                <button
+                  key={f.id}
+                  className={`frame-thumb-mini${selectedFrame?.id === f.id ? ' active' : ''}`}
+                  style={{ background: f.color }}
+                  title={f.label}
+                  onClick={() => pickFrame(f.id)}
+                />
+              ))}
             </div>
-          )}
 
-          {/* downloads */}
-          <div className="sticker-controls download-row">
-            <button className="dl-btn" onClick={downloadPNG} disabled={isExporting}>Download PNG</button>
-            <button className="dl-btn" onClick={downloadSVG} disabled={isExporting}>Download SVG</button>
-            <button className="dl-btn" onClick={downloadStickers} disabled={isExporting}>Download Stickers</button>
-          </div>
+            <div className="sticker-controls">
+              <button className="sticker-toggle-btn" onClick={() => setShowStickerPanel(v => !v)}>
+                {showStickerPanel ? 'Close Stickers' : '✨ Add Stickers'}
+              </button>
+              {selectedStickerId && (
+                <>
+                  <button className="sticker-ctrl-btn" onClick={() => rotateSticker(-15)} title="Rotate left">⟲</button>
+                  <button className="sticker-ctrl-btn" onClick={() => rotateSticker(15)} title="Rotate right">⟳</button>
+                  <button className="sticker-ctrl-btn sticker-del-btn" onClick={deleteSelectedSticker} title="Remove sticker">✕</button>
+                </>
+              )}
+            </div>
 
-          <div className="sticker-controls">
-            <button className="retake-btn" onClick={() => navigate('/snap')}>← Back to Camera</button>
+            {showStickerPanel && (
+              <div className="sticker-panel">
+                <div className="sticker-grid">
+                  {STICKERS.map(src => (
+                    <div key={src} className="sticker-thumb" onClick={() => addSticker(src)}>
+                      <img src={src} alt="sticker" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* downloads */}
+            <div className="sticker-controls download-row">
+              <button className="dl-btn" onClick={downloadPNG} disabled={isExporting}>Download PNG</button>
+              <button className="dl-btn" onClick={downloadSVG} disabled={isExporting}>Download SVG</button>
+              <button className="dl-btn" onClick={downloadStickers} disabled={isExporting}>Download Stickers</button>
+            </div>
+
+            <div className="sticker-controls">
+              <button className="retake-btn" onClick={() => navigate('/snap')}>← Back to Camera</button>
+            </div>
           </div>
         </div>
       </div>

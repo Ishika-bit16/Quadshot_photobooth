@@ -15,6 +15,9 @@ export default function Home() {
     if (Math.abs(i - hovered) === 2) return 'far-neighbour'
     return ''
   }
+  const handleClick = () => {
+  setTimeout(() => navigate('/Snaps'), 300);
+};
 
   return (
     <>
@@ -40,11 +43,26 @@ export default function Home() {
             ))}
           </span>
         </div>
-        <div id="button_one">
-          <button onClick={() => navigate('/Snaps')}>Take a photo</button>
-        </div>
+       
+<div id="button_one">
+  <button className="flip-btn" onClick={() => navigate('/Snaps')}>
+    <div className="flip-inner">
+      <div className="flip-front">
+        <span>Take a photo !</span>
       </div>
+     <div className="flip-back">
+  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 3h6l1.5 2H20a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3.5L9 3z"/>
+    <circle cx="12" cy="13" r="4"/>
+    <circle cx="18" cy="8.5" r="0.5" fill="currentColor" stroke="none"/>
+  </svg>
+</div>
+    </div>
+  </button>
+</div>     </div>
+    
     </>
   )
 }
 
+ 

@@ -208,9 +208,9 @@
      font-size: clamp(2.7rem, 11vw, 8rem);
      letter-spacing: 0.08em;
      color: transparent;
-     -webkit-text-stroke: 1px rgba(160, 70, 70, 0.5);
+     -webkit-text-stroke: 1.5px rgba(108, 20, 20, 0.5);
      /* Embossed / engraved look */
-    text-shadow: 2px 1px 3px rgba(255, 255, 255, 0.6), -4px -1px 0px rgba(150, 60, 60, 0.3);
+    text-shadow: 0 0 3px rgba(127, 21, 21, 0.5), -4px -1px 0px rgba(150, 60, 60, 0.3);
     display: inline-block;
     animation: fadeIn 0.5s cubic-bezier(0.25, 0.1, 0, 0.59) both;
  }
@@ -258,7 +258,7 @@
  @keyframes fadeIn {
      from {
          opacity: 0;
-         transform: translateY(10px);
+         transform: translateY(15px);
      }
 
      to {
@@ -279,56 +279,91 @@
 
         /* Hover state – letter pops up and glows */
         #photobooth > span > span.bubble {
-            transform: translateY(-18px) scale(1.22);
+            transform: translateY(-20px) scale(1.22);
             -webkit-text-stroke: 1.5px rgba(200, 80, 80, 0.85);
             text-shadow:
-                0 0 24px rgba(255, 140, 140, 0.55),
-                1px 1px 0px rgba(255, 255, 255, 0.7),
-                -1px -1px 0px rgba(150, 60, 60, 0.35);
+                0 0 24px rgba(220, 139, 139, 0.55),
+                1px 1px 0px rgba(253, 253, 253, 0.7),
+                -1px -1px 0px rgba(187, 105, 105, 0.35);
         }
 
         /* Neighbour letters – gentle sympathetic bounce */
         #photobooth > span > span.neighbour {
-            transform: translateY(-7px) scale(1.07);
+            transform: translateY(-10px) scale(1.07);
         }
 
         /* Far neighbour – very subtle */
         #photobooth > span > span.far-neighbour {
-            transform: translateY(-3px) scale(1.03);
+            transform: translateY(-5px) scale(1.03);
         }
- /* ── BUTTON ── */
- #button_one {
-     position: relative;
-     z-index: 1;
-     animation: fadeIn 0.5s 0.6s ease both;
- }
+/* ── BUTTON (FLIP) ── */
+#button_one {
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 0.5s 0.6s ease both;
+    perspective: 800px;
+}
 
- #button_one button {
-     font-family: 'Cormorant Garamond', serif;
-     font-size: 1.15rem;
-     font-weight: 400;
-     letter-spacing: 0.05em;
-     color: #5a1f1f;
-     background: rgba(241, 124, 113, 0.55);
-     border: 1.8px solid rgba(212, 70, 57, 0.6);
-     border-radius: 14px;
-     padding: 16px 52px;
-     cursor: pointer;
-     backdrop-filter: blur(6px);
-     transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
- }
+#button_one .flip-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 180px;
+    height: 60px;
+}
 
- #button_one button:hover {
-     background: rgba(240, 110, 100, 0.7);
-     transform: translateY(-2px);
-     box-shadow: 0 8px 24px rgba(200, 80, 80, 0.25);
- }
+#button_one .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
 
- #button_one button:active {
-     transform: translateY(0);
- }
+#button_one .flip-btn:hover .flip-inner {
+    transform: rotateY(180deg);
+}
 
+#button_one .flip-front,
+#button_one .flip-back {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 32px;
+}
 
+#button_one .flip-front {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    background: rgba(153, 15, 15, 0.764);
+    border: 3px solid rgba(163, 30, 30, 0.6);
+}
+
+#button_one .flip-back {
+    color: #ffffff;
+    background: rgba(149, 28, 28, 0.9);
+    border: 3px solid rgba(163, 30, 30, 0.6);
+    transform: rotateY(180deg);
+}
+#button_one .flip-back svg {
+    background: transparent;
+}
+
+#button_one .flip-btn:active .flip-inner {
+    transform: rotateY(180deg) translateY(4px);
+}
+
+#button_one .flip-btn:not(:hover):active .flip-inner {
+    transform: translateY(4px);
+}
  /*--SNAPSHOT--*/
   #snap .card {
     margin: 10px auto;
@@ -340,7 +375,8 @@
     justify-content: center;
     font-family: 'DM Sans', sans-serif;
     overflow: hidden;
-    gap: 2rem;
+   
+  
 }
  
 /* ── grain overlay ── */
@@ -390,8 +426,8 @@
     aspect-ratio: 16/9;
     background: #111;
     border-radius: 18px;
-    overflow: hidden;
-    margin-top: 1.8rem;
+    overflow: none;
+    
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05);
 }
  
@@ -496,6 +532,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-bottom: 14px;  
 }
  
 .filter-pill {
@@ -550,15 +587,17 @@
 .snap-wrap {
     display: flex;
     justify-content: center;
-    padding-bottom: 4px;
+    
 }
- 
+ .retake-btn{
+  color: #000;
+ }
 .snap-btn {
     background: rgba(231, 95, 82, 0.55);
     color: var(--white);
     border: 1.8px solid rgba(212, 70, 57, 0.6);
-    border-radius: 14px;
-    padding: 14px 56px;
+    border-radius: 18px;
+    padding: 14px 36px;
     font-family: 'Playfair Display', serif;
     font-size: 1.1rem;
     font-style: italic;
@@ -596,20 +635,22 @@
     flex-wrap: wrap;
     min-height: 0;
     max-height: 0;
-    overflow: hidden;
+    overflow: none;
     transition: max-height .4s ease;
 }
  
 .strip.has-photos { max-height: 120px; }
  
 .snap-thumb {
-    width: 80px;
-    height: 56px;
+    width: 100%;
+    height: 100%;
     border-radius: 8px;
     object-fit: cover;
+    aspect-ratio: 16/9;
     border: 2px solid var(--white);
     box-shadow: 0 2px 8px var(--shadow);
     cursor: pointer;
+    overflow: none;
     transition: transform .15s;
     animation: thumbIn .3s ease both;
 }
@@ -641,7 +682,15 @@
   justify-content: center;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: auto;           /* allow scroll if content is taller than viewport */
+  -ms-overflow-style: none;   /* IE / Edge legacy */
+  scrollbar-width: none;      /* Firefox */
 }
+
+.lightbox::-webkit-scrollbar { /* Chrome, Safari, Edge */
+  display: none;
+}
+
 .lightbox.open {
   display: flex;
 }
