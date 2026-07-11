@@ -1,6 +1,9 @@
 /* ── Append to your existing stylesheet ── */
 
-/* Camera + side thumbnail panel sit side by side */
+/* ═══════════════════════════════════════════════
+   CAMERA PAGE (Snaps.jsx) — unchanged from before
+═══════════════════════════════════════════════ */
+
 .camera-layout {
   display: flex;
   flex-direction: row;
@@ -14,7 +17,6 @@
   min-width: 280px;
 }
 
-/* Side panel showing each captured shot as it comes in */
 .snaps-side-panel {
   flex: 0 0 140px;
   display: flex;
@@ -79,69 +81,12 @@
 .retake-btn:hover { background: rgba(255, 255, 255, 0.2); }
 .next-btn:hover { filter: brightness(1.08); }
 
-/* Lightbox retake/next row */
 .lb-actions {
   display: flex;
   gap: 10px;
   margin-top: 12px;
 }
 
-/* ── Decor page: photo strip + controls side by side ── */
-.strip-composer {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-/* Photo strip stays a fixed, non-shrinking column on the left */
-.strip-composer .composed-strip {
-  flex: 0 0 auto;
-}
-
-/* Everything else (frame picker, stickers, downloads, back button)
-   forms its own column to the right of the photo strip */
-.decor-controls {
-  flex: 1 1 320px;
-  min-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.decor-controls .sticker-controls {
-  flex-wrap: wrap;
-}
-
-.decor-controls .sticker-panel {
-  max-height: 360px;
-  overflow-y: auto;
-}
-
-/* Stack vertically (photo on top, controls below) on small screens */
-@media (max-width: 720px) {
-  .strip-composer {
-    flex-direction: column;
-    align-items: center;
-  }
-  .decor-controls {
-    width: 100%;
-    min-width: 0;
-  }
-}
-
-/* Decor page download row */
-.download-row {
-  flex-wrap: wrap;
-}
-
-.dl-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Stack side panel under the camera on small screens */
 @media (max-width: 640px) {
   .camera-layout {
     flex-direction: column;
@@ -159,4 +104,298 @@
   .snap-thumb-wrap {
     flex: 0 0 90px;
   }
+}
+
+
+/* ═══════════════════════════════════════════════
+   DECOR PAGE (Decor.jsx)
+═══════════════════════════════════════════════ */
+
+/* The base stylesheet only ever styles `.card` inside `#snap` — on the
+   decor page `.card` had zero background/padding, which is a big part of
+   why things looked broken/black (backgroundless elements can get
+   auto-inverted to black by browser dark-mode extensions). Give the decor
+   page its own explicit, professional card treatment. */
+#decor {
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+}
+
+#decor .card {
+  position: relative;
+  width: min(1080px, 96%);
+  margin: 1.5rem auto;
+  min-height: unset;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(120, 60, 60, 0.16);
+  padding: 2.75rem 2rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+#decor .wordmark {
+  position: static;
+  margin-bottom: 0.35rem;
+}
+
+#decor .decor-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  color: var(--dark);
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+/* ── Layout: photo strip fixed on the left, controls flexible on the
+   right. Scoped under #decor with an extra class so it always wins
+   regardless of stylesheet load order. ── */
+#decor .strip-composer {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+#decor .strip-composer .composed-strip {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+#decor .decor-controls {
+  flex: 1 1 340px;
+  max-width: 460px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Stack vertically (photo on top, controls below) on small screens */
+@media (max-width: 760px) {
+  #decor .strip-composer {
+    flex-direction: column;
+    align-items: center;
+  }
+  #decor .decor-controls {
+    width: 100%;
+    max-width: 480px;
+    min-width: 0;
+  }
+}
+
+/* ── Photo strip — richer shadow that picks up the current frame color
+   so it reads as a deliberate colored mat, not a dull sliver ── */
+#decor .composed-strip {
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.12),
+    0 22px 46px -14px color-mix(in srgb, var(--frame-color, #823A3A) 65%, transparent);
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* ── Control section grouping ── */
+.control-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.control-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: 0.01em;
+}
+
+.control-hint {
+  font-size: 0.8rem;
+  color: #8a6a6a;
+  margin-top: -4px;
+}
+
+.sticker-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sticker-inline-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Frame color swatches — bigger, saturated, with a glossy highlight
+   and a clear active state so colors read as vivid, not dull ── */
+.frame-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.frame-thumb-mini {
+  position: relative;
+  width: 52px;
+  height: 68px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: none;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55),
+    inset 0 14px 18px -8px rgba(255, 255, 255, 0.45),
+    0 4px 10px rgba(0, 0, 0, 0.16);
+  filter: saturate(1.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.frame-thumb-mini:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+.frame-thumb-mini.active {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.75),
+    0 0 0 3px #fff,
+    0 0 0 6px var(--coral),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px) scale(1.06);
+}
+
+.frame-check {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a1a18;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Photo shape picker — swatches show a live preview of the shape
+   via the same clip-path used on the real photos ── */
+.shape-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shape-thumb-mini {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid rgba(205, 180, 219, 0.4);
+  background: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.shape-thumb-mini:hover {
+  transform: translateY(-2px);
+  border-color: var(--coral);
+}
+
+.shape-thumb-mini.active {
+  border-color: var(--coral);
+  background: var(--very_light_pink);
+  box-shadow: 0 0 0 3px rgba(255, 140, 140, 0.28);
+}
+
+.shape-swatch {
+  display: block;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--coral), #c0504a);
+}
+.shape-swatch[data-shape="oval"]     { clip-path: url(#shape-oval); }
+.shape-swatch[data-shape="triangle"] { clip-path: url(#shape-triangle); }
+.shape-swatch[data-shape="heart"]    { clip-path: url(#shape-heart); }
+.shape-swatch[data-shape="rect"]     { clip-path: none; border-radius: 8px; }
+
+/* ── Applying the chosen shape to the actual photo slots ── */
+.composed-slot[data-shape="oval"] {
+  clip-path: url(#shape-oval);
+  border-radius: 0;
+}
+.composed-slot[data-shape="triangle"] {
+  clip-path: url(#shape-triangle);
+  border-radius: 0;
+}
+.composed-slot[data-shape="heart"] {
+  clip-path: url(#shape-heart);
+  border-radius: 0;
+}
+.composed-slot[data-shape="rect"] {
+  clip-path: none;
+  border-radius: 14px;
+}
+
+/* ── Sticker panel — always visible now, so give it a comfortable
+   fixed-height scroll area instead of a cramped popover ── */
+.decor-controls .sticker-panel {
+  width: 100%;
+  max-width: none;
+  max-height: 340px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.decor-controls .sticker-grid {
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  max-height: 320px;
+}
+
+/* ── Download row ── */
+#decor .download-row {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+#decor .dl-btn {
+  margin-left: 0;
+}
+
+.dl-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#decor .retake-btn {
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--dark);
+  font-family: 'DM Sans', sans-serif;
+}
+
+#decor .retake-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  #decor .card { padding: 1.75rem 1.1rem 1.75rem; border-radius: 20px; }
+  .decor-controls .sticker-panel { max-height: 260px; }
+  .decor-controls .sticker-grid { max-height: 240px; }
 }
