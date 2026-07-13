@@ -34,10 +34,10 @@
      min-height: 100vh;
      background: radial-gradient(ellipse at center,
              var(--white) 0%,
-             var(--coral) 0%,
-             var(--Pastel_Pink) 38%,
-             var(--very_light_pink ) 74%,
-             var(--pippin) 100%);
+             var(--very_light_pink) 0%,
+             var(--coral) 38%,
+             var(--pippin) 74%,
+             var(--dark) 100%);
      font-family: 'Cormorant Garamond', serif;
  }
  #announcement{
@@ -75,7 +75,7 @@
 }
 
 #logo {
-    font-family: 'Great Vibes', cursive;
+    font-family: 'The Nautigal', cursive;
     font-size: 1.8rem;
     color: #c0504a;
     letter-spacing: 0.02em;
@@ -99,7 +99,7 @@
 
 #links a {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.05rem;
+    font-size: 1.5rem;
     font-weight: 400;
     color: #6b3535;
     text-decoration: none;
@@ -203,7 +203,7 @@
  }
 
  #photobooth>span>span {
-     font-family: 'Cormorant Garamond', serif;
+     font-family: 'Sawarabi Mincho', serif;
      font-weight: 150px;
      font-size: clamp(2.7rem, 11vw, 8rem);
      letter-spacing: 0.08em;
@@ -338,7 +338,7 @@
 }
 
 #button_one .flip-front {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Sawarabi Mincho', serif;
     font-size: 1.15rem;
     font-weight: 400;
     letter-spacing: 0.05em;
@@ -348,8 +348,12 @@
 }
 
 #button_one .flip-back {
+      font-family: 'Sawarabi Mincho', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
     color: #ffffff;
-    background: rgba(149, 28, 28, 0.9);
+    background: rgba(153, 15, 15, 0.764);
     border: 3px solid rgba(163, 30, 30, 0.6);
     transform: rotateY(180deg);
 }
@@ -443,12 +447,12 @@
  
 #canvas { display: none; }
 #camera{
-    width: 48px;
-    height: 48px;
-    filter: brightness(0) saturate(100%) invert(76%) sepia(14%) saturate(370%) hue-rotate(305deg) brightness(108%) contrast(108%);
-    text-decoration: none;
+    width: 52px;
+    height: 52px;
+   
     display: block;
     opacity: 1;
+    
 }
 /* flash overlay */
 .flash {
@@ -522,10 +526,14 @@
     box-shadow: 0 4px 16px var(--shadow);
     transition: transform .15s;
 }
- 
+
 .cam-prompt button:hover { transform: scale(1.04); }
  
 .cam-prompt svg { opacity: .25; }
+.cam-icon{
+  color:none;
+  background-color: none;
+}
  
 /* ── filter row ── */
 .filter-row {

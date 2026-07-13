@@ -8,7 +8,7 @@ export default function About() {
 
       {/* Hero */}
       <div className="about-hero">
-        <p className="eyebrow">Our Story</p>
+       
         <h1>Built for <em>moments</em><br />that deserve a frame.</h1>
         <p className="tagline">QuadShot is a browser-based photobooth that lets you capture, style, and keep four photos — all in one joyful session.</p>
         <div className="rule"><span className="rule-dot"></span></div>

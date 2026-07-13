@@ -157,7 +157,7 @@ export default function Snaps() {
             {/* Camera prompt */}
             {camPrompt && (
               <div className="cam-prompt" id="camPrompt">
-                <img id="camera" src="/assets/images/camera.png" alt="camera icon" className="cam-icon" />
+                <img id="camera" src="../dist/Stickers/png-90.svg" alt="camera icon" className="cam-icon" />
                 <p>Camera access needed</p>
                 <button onClick={startCamera}>Enable Camera</button>
               </div>

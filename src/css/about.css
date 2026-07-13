@@ -72,11 +72,11 @@
 }
 
 #logo {
-    font-family: 'Great Vibes', cursive;
-    font-size: 1.8rem;
-    color: #c0504a;
-    letter-spacing: 0.02em;
-    min-width: 110px;
+  font-family: 'The Nautigal', cursive;
+  font-size: 1.8rem;
+  color: #c0504a;
+  letter-spacing: 0.02em;
+  min-width: 110px;
 }
 
 #logo a {
@@ -176,15 +176,7 @@
       position: relative;
     }
 
-    .about-hero .eyebrow {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--coral);
-      margin-bottom: 0.75rem;
-    }
+
 
     .about-hero h1 {
       font-family: 'Cormorant Garamond', serif;
@@ -198,7 +190,9 @@
 
     .about-hero h1 em {
       font-style: italic;
-      color: var(--coral);
+      color:#ab4545;
+    
+     
     }
 
     .about-hero .tagline {
