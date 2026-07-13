@@ -18,6 +18,10 @@ const FRAME_COLORS = [
   { id: 6, label: 'Petal',    color: '#FFDDDD' },
   { id: 7, label: 'Sage',     color: '#DFF4A6' },
   { id: 8, label: 'Rosewood', color: '#D67777' },
+  { id: 9, label: 'Dark blue',   color: '#003049' },
+  { id: 10, label: 'Brown',     color: '#432818' },
+  { id: 11, label: 'Lavender',color: '#E3D4FF' },
+  { id: 12, label: 'Berry',    color: '#a53860' },
 ]
 
 // Photo shapes. Each button shows a live preview of the shape itself
@@ -341,11 +345,7 @@ export default function Decor() {
       </div>
 
       <div className="card">
-        <div className="wordmark">
-          <span>QuadShot</span>
-          <span>Decorate</span>
-        </div>
-
+     
         <h1 className="decor-heading">Make it yours ✨</h1>
 
         <div className="strip-composer">
@@ -449,9 +449,8 @@ export default function Decor() {
             <section className="control-block">
               <h3 className="control-label">Download</h3>
               <div className="sticker-controls download-row">
-                <button type="button" className="dl-btn" onClick={downloadPNG} disabled={isExporting}>Download PNG</button>
-                <button type="button" className="dl-btn" onClick={downloadSVG} disabled={isExporting}>Download SVG</button>
-                <button type="button" className="dl-btn" onClick={downloadStickers} disabled={isExporting}>Download Stickers</button>
+                <button type="button" className="cursor-box dl-btn" onClick={downloadPNG} disabled={isExporting}>Download PNG</button>
+                   <button type="button" className="cursor-box dl-btn" onClick={downloadStickers} disabled={isExporting}>Download Stickers</button>
               </div>
             </section>
 

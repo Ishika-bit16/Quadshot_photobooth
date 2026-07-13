@@ -374,8 +374,42 @@
   gap: 10px;
 }
 
+.cursor-box {
+    width: 200px;
+    height: 42px;
+    background-color: var(--coral);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cursor-box::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(239, 99, 99, 0.803), transparent);
+    top: -100%;
+    left: -100%;
+    transition: all 0.5s ease;
+}
+
+.cursor-box:hover::before {
+    top: 100%;
+    left: 100%;
+}
+
 #decor .dl-btn {
   margin-left: 0;
+
+
 }
 
 .dl-btn:disabled {
@@ -398,4 +432,4 @@
   #decor .card { padding: 1.75rem 1.1rem 1.75rem; border-radius: 20px; }
   .decor-controls .sticker-panel { max-height: 260px; }
   .decor-controls .sticker-grid { max-height: 240px; }
-}
+  .cursor-box { width:150px; height: 38px; font-size: 0.59rem; padding: 0.75rem; }}
