@@ -746,7 +746,6 @@
 }
 #contact{
       font-family: 'DM Sans', sans-serif;
-      background: radial-gradient(ellipse at 60% 20%, var(--very_light_pink) 0%, var(--Pastel_Pink) 55%, var(--coral) 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -759,7 +758,7 @@
     position: relative;
     width: 100%;
     max-width: 940px;
-    margin: 3rem auto 0;
+    margin:  0;
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
@@ -787,7 +786,7 @@
       justify-content: center;
       align-items: start;
       padding: 48px 42px;
-      background: var(--coral);
+      background: rgb(252, 161, 161);
       overflow: hidden;
     }
 
@@ -958,7 +957,7 @@
 
     .btn-submit {
       margin-top: 6px;
-      background: var(--coral);
+      background: rgb(252, 161, 161);
       color: var(--white);
       border: none;
       border-radius: 12px;

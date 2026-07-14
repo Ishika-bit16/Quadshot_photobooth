@@ -1,35 +1,51 @@
 import { useState } from 'react'
 import Navbar from '../components/Navbar.jsx'
 
-export default function Contact() {
-  const [form, setForm] = useState({ name: '', email: '', message: '' })
-  const [sent, setSent] = useState(false)
+export default function ContactForm() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [result, setResult] = useState("");
 
-  const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSend = (e) => {
-    e.preventDefault()
-    if (!form.name || !form.email || !form.message) return
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    setResult("Sending....");
 
-    // Opens the user's default email client — no third-party service, no API keys
-    const subject = encodeURIComponent(`Quadshot Feedback from ${form.name}`)
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
-    )
-    window.location.href = `mailto:ishikasogra@gmail.com?subject=${subject}&body=${body}`
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("email", form.email);
+    formData.append("message", form.message);
+    formData.append("access_key", "acd8ae28-7623-4505-ab93-08996119c400");
 
-    setSent(true)
-    setForm({ name: '', email: '', message: '' })
-  }
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setResult("Thank you for your feedback!");
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        console.error("Web3Forms error:", data);
+        setResult(`Error: ${data.message || "Something went wrong. Please try again."}`);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      setResult("Network error. Please check your connection and try again.");
+    }
+  };
 
   return (
     <div id="contact">
       <Navbar />
 
-      <form className="contact-card" onSubmit={handleSend}>
-
+      <form className="contact-card" onSubmit={onSubmit}>
         {/* ── Left panel ── */}
         <div className="left-panel">
           <h2>Contact Us</h2>
@@ -101,14 +117,13 @@ export default function Contact() {
             Send Message
           </button>
 
-          {sent && (
+          {result && (
             <p className="success-msg">
-              ✅ Your email client has opened — just hit Send!
+              {result === "Sending...." ? result : `✅ ${result}`}
             </p>
           )}
         </div>
-
       </form>
     </div>
-  )
+  );
 }
