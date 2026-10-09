@@ -6,7 +6,7 @@
 
 *A nostalgic photobooth experience right from your browser.*
 
-<img src="<img width="1535" height="722" alt="image" src="https://github.com/user-attachments/assets/d7df1947-a00f-4965-8bb4-f4fbcb54dd0d" alt="Quadshot Preview" width="100%">
+<img width="1535" height="722" alt="image" src="https://github.com/user-attachments/assets/d7df1947-a00f-4965-8bb4-f4fbcb54dd0d" alt="Quadshot Preview" width="100%">
 
 ![HTML5](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
@@ -52,19 +52,18 @@ Think of it as your own little digital photo studio. 📷✨
 
 # 🛠 Tech Stack
 
-- 🌐 HTML5
-- 🎨 CSS3
-- ⚡ JavaScript
-- 📷 Web Camera API
-- ✨ CSS Animations
+⚛️ React 18 – UI Component Framework
+
+⚡ Vite – Fast Build Tool & Dev Server
+
+🎨 CSS3 / CSS Animations – Styling & Layouts
+
+📷 Web Camera API – Camera Access (getUserMedia)
+
+⚡ JavaScript (ES6+) – Logic & State Management
 
 ---
 
-# 📂 Project Structure
-
-```
-
----
 
 # 🚀 Getting Started
 
