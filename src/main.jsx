@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './css/style.css'
-import './css/about.css'
 import './css/snaps-decor-additions.css'
 import App from './App.jsx'
 

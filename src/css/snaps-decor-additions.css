@@ -242,7 +242,7 @@
 .frame-picker-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 
 .frame-thumb-mini {
@@ -288,67 +288,6 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-}
-
-/* ── Photo shape picker — swatches show a live preview of the shape
-   via the same clip-path used on the real photos ── */
-.shape-picker-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.shape-thumb-mini {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  border: 2px solid rgba(205, 180, 219, 0.4);
-  background: rgba(255, 255, 255, 0.65);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-
-.shape-thumb-mini:hover {
-  transform: translateY(-2px);
-  border-color: var(--coral);
-}
-
-.shape-thumb-mini.active {
-  border-color: var(--coral);
-  background: var(--very_light_pink);
-  box-shadow: 0 0 0 3px rgba(255, 140, 140, 0.28);
-}
-
-.shape-swatch {
-  display: block;
-  width: 30px;
-  height: 30px;
-  background: linear-gradient(135deg, var(--coral), #c0504a);
-}
-.shape-swatch[data-shape="oval"]     { clip-path: url(#shape-oval); }
-.shape-swatch[data-shape="triangle"] { clip-path: url(#shape-triangle); }
-.shape-swatch[data-shape="heart"]    { clip-path: url(#shape-heart); }
-.shape-swatch[data-shape="rect"]     { clip-path: none; border-radius: 8px; }
-
-/* ── Applying the chosen shape to the actual photo slots ── */
-.composed-slot[data-shape="oval"] {
-  clip-path: url(#shape-oval);
-  border-radius: 0;
-}
-.composed-slot[data-shape="triangle"] {
-  clip-path: url(#shape-triangle);
-  border-radius: 0;
-}
-.composed-slot[data-shape="heart"] {
-  clip-path: url(#shape-heart);
-  border-radius: 0;
-}
-.composed-slot[data-shape="rect"] {
-  clip-path: none;
-  border-radius: 14px;
 }
 
 /* ── Sticker panel — always visible now, so give it a comfortable

@@ -27,11 +27,7 @@ export default function Navbar() {
         <Link to="/about">About</Link>
         <Link to="/contact">Contact</Link>
       </div>
-      <div id="rightnav">
-        <a href="https://github.com/Ishika-bit16/Quadshot_photobooth" target="_blank" rel="noreferrer" id="github-link">
-          <GithubIcon />
-        </a>
-      </div>
+      
     </nav>
   )
 }

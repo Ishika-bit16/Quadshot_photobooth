@@ -48,9 +48,7 @@ export default function ContactForm() {
       <form className="contact-card" onSubmit={onSubmit}>
         {/* ── Left panel ── */}
         <div className="left-panel">
-          <h2>Contact Us</h2>
-          <p>We love to hear your feedback about Quadshot and the memories you made with it.</p>
-
+         
           <div id="left-panel-contact">
             <div className="info-row">
               <svg width="16" height="16" fill="none" stroke="var(--coral)" strokeWidth="1.8" viewBox="0 0 24 24">

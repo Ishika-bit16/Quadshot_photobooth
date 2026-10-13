@@ -26,11 +26,6 @@ export default function Home() {
       <Stars />
       <Stickers />
 
-      <section id="announcement">
-        <div id="holder">
-          <header id="header_announcement"><p>Make sure to give the feedback</p></header>
-        </div>
-      </section>
 
       <Navbar />
 
@@ -51,15 +46,9 @@ export default function Home() {
 
         <div id="button_one">
           <button className="flip-btn" onClick={() => navigate('/Snaps')}>
-            <div className="flip-inner">
-              <div className="flip-front">
+   
                 <span>Take a photo !</span>
-              </div>
-              <div className="flip-back">
-                <span>Click me!</span>
-            
-            </div>
-        </div>
+       
       </button>
     </div >     </div >
     

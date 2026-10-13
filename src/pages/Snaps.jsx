@@ -3,30 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 
 const FILTERS = {
-  none:      'none',
+  none: 'none',
   grayscale: 'grayscale(100%)',
-  sepia:     'sepia(100%)',
-  saturate:  'saturate(200%) hue-rotate(10deg)',
-  cool:      'hue-rotate(180deg) saturate(130%)',
-  invert:    'invert(100%)',
+  sepia: 'sepia(100%)',
+  saturate: 'saturate(200%) hue-rotate(10deg)',
+  cool: 'hue-rotate(180deg) saturate(130%)',
+  invert: 'invert(100%)',
 }
 
 const FILTER_KEYS = Object.keys(FILTERS)
 const TOTAL_SHOTS = 4
 
 export default function Snaps() {
-  const videoRef  = useRef(null)
+  const videoRef = useRef(null)
   const canvasRef = useRef(null)
-  const flashRef  = useRef(null)
-  const navigate  = useNavigate()
+  const flashRef = useRef(null)
+  const navigate = useNavigate()
 
   const [currentFilter, setCurrentFilter] = useState('none')
-  const [cameraReady,   setCameraReady]   = useState(false)
-  const [isCounting,    setIsCounting]    = useState(false)
-  const [camPrompt,     setCamPrompt]     = useState(true)
-  const [snaps,         setSnaps]         = useState([])          // array of dataURLs
-  const [countdown,     setCountdown]     = useState(null)        // { label, number }
-  const [lightbox,      setLightbox]      = useState(null)        // { src, index }
+  const [cameraReady, setCameraReady] = useState(false)
+  const [isCounting, setIsCounting] = useState(false)
+  const [camPrompt, setCamPrompt] = useState(true)
+  const [snaps, setSnaps] = useState([])          // array of dataURLs
+  const [countdown, setCountdown] = useState(null)        // { label, number }
+  const [lightbox, setLightbox] = useState(null)        // { src, index }
 
   // Apply live filter to video element
   useEffect(() => {
@@ -59,13 +59,13 @@ export default function Snaps() {
   }
 
   const takeSnap = useCallback(() => {
-    const video  = videoRef.current
+    const video = videoRef.current
     const canvas = canvasRef.current
     if (!video || !canvas) return
     const w = video.videoWidth
     const h = video.videoHeight
     if (!w || !h) return
-    canvas.width  = w
+    canvas.width = w
     canvas.height = h
     const ctx = canvas.getContext('2d')
     ctx.filter = FILTERS[currentFilter] || 'none'
@@ -140,7 +140,7 @@ export default function Snaps() {
         <div className="camera-layout">
           {/* Viewfinder */}
           <div className="viewfinder">
-            <video ref={videoRef} id="video" autoPlay playsInline muted  />
+            <video ref={videoRef} id="video" autoPlay playsInline muted />
             <canvas ref={canvasRef} id="canvas" style={{ display: 'none' }} />
 
             {/* Flash overlay */}
@@ -189,34 +189,35 @@ export default function Snaps() {
             </div>
           )}
         </div>
-
-        {/* Filter row */}
-        <div className="filter-row">
-          <div className="filter-pill">
-            {FILTER_KEYS.map(key => (
-              <button
-                key={key}
-                className={`filter-btn${currentFilter === key ? ' active' : ''}`}
-                data-filter={key}
-                title={key}
-                onClick={() => setCurrentFilter(key)}
-              >
-                <div className="swatch"></div>
-              </button>
-            ))}
+        <div className="filter-and-snap">
+          {/* Filter row */}
+          <div className="filter-row">
+            <div className="filter-pill">
+              {FILTER_KEYS.map(key => (
+                <button
+                  key={key}
+                  className={`filter-btn${currentFilter === key ? ' active' : ''}`}
+                  data-filter={key}
+                  title={key}
+                  onClick={() => setCurrentFilter(key)}
+                >
+                  <div className="swatch"></div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Snap button */}
-        <div className="snap-wrap">
-          <button
-            className="snap-btn"
-            id="snapBtn"
-            onClick={capturePhoto}
-            disabled={isCounting}
-          >
-            Snap
-          </button>
+          {/* Snap button */}
+          <div className="snap-wrap">
+            <button
+              className="snap-btn"
+              id="snapBtn"
+              onClick={capturePhoto}
+              disabled={isCounting}
+            >
+              Snap
+            </button>
+          </div>
         </div>
       </div>
 

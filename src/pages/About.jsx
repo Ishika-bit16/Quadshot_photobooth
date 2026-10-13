@@ -1,84 +1,105 @@
-import { Link } from 'react-router-dom'
-import Navbar from '../components/Navbar.jsx'
+import { useEffect, useRef, useState } from 'react'
+import '../css/about.css'   // adjust the path if your CSS lives somewhere else
+import Navbar from '../components/Navbar'
+
+const ABOUT_SLIDES = [
+  {
+    tag: '01 / ABOUT US',
+    title: 'The Magic of Four Snaps',
+    text: 'QuadShot was crafted to bring the warm, candid nostalgia of Korean photobooths right to your screen.\n\nSnap four spontaneous moments, customize with dreamy frames and stickers, and keep your sweetest memories alive forever.',
+    image: '/about-polaroid.jpg',
+    alt: 'Vintage photobooth snapshot',
+  },
+  {
+    tag: '02 / HOW IT WORKS',
+    title: 'Snap, Style & Cherish',
+    text: '1. Hit "Take a photo" and strike your favourite poses as the timer counts.\n2. Choose from rich frame colors and live creative filters.\n3. Add stickers and save your high-resolution photostrip in seconds.',
+    image: '/Stickers/qs-photostrips.png',
+    alt: 'Quadshot photostrips',
+  },
+  {
+    tag: '03 / PRIVATE & LOCAL',
+    title: 'Your Photos Stay Strictly Yours',
+    text: 'Everything happens 100% locally in your browser.\n\nNo accounts, no tracking, and zero cloud uploads. Your photos are never stored on any server and remain strictly yours.',
+    image: '/Stickers/qs-lock.png',
+    alt: 'Private and secure',
+  },
+]
 
 export default function About() {
+  const [slideIndex, setSlideIndex] = useState(0)
+  const wrapRef = useRef(null)
+
+  // play the entrance animation once, when the section scrolls into view
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        el.classList.add('in')
+        io.disconnect()
+      }
+    }, { threshold: 0.25 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  const nextSlide = () => setSlideIndex((prev) => (prev + 1) % ABOUT_SLIDES.length)
+  const prevSlide = () => setSlideIndex((prev) => (prev - 1 + ABOUT_SLIDES.length) % ABOUT_SLIDES.length)
+
+  const activeSlide = ABOUT_SLIDES[slideIndex]
+  const isSticker = activeSlide.image.includes('/Stickers/')
+
   return (
-    <div className="about-page">
+    <div className="page-container about-page-container">
       <Navbar />
+      <div className="section-wrap" id="about" ref={wrapRef}>
+        <h2 className="section-title">ABOUT</h2>
 
-      {/* Hero */}
-      <div className="about-hero">
-       
-        <h1>Built for <em>moments</em><br />that deserve a frame.</h1>
-        <p className="tagline">QuadShot is a browser-based photobooth that lets you capture, style, and keep four photos — all in one joyful session.</p>
-        <div className="rule"><span className="rule-dot"></span></div>
-      </div>
+        <div className="about-lavender-card">
+          <img src="/Stickers/qs-bow.png" alt="Ribbon Bow" className="card-sticker-bow" />
+          <img src="/Stickers/qs-lock.png" alt="Heart Lock" className="card-sticker-lock" />
 
-      {/* Card */}
-      <div className="about-card">
-
-        {/* What we are */}
-        <div className="about-section">
-          <p className="section-label">What we are</p>
-          <div className="about-intro-grid">
-            <div>
-              <h2>Your personal photobooth, right in the browser.</h2>
-              <p>QuadShot lets you snap a four-photo layout, pick a frame that fits your mood, and download the whole thing in seconds — no app, no account, no friction.</p>
-              <p>Whether it's a solo selfie session or a table full of friends at a party, QuadShot turns a regular moment into something you'll actually want to save.</p>
-            </div>
-            <div className="about-intro-right">
-              <div className="stat-pill">
-                <span className="stat-num">4</span>
-                <span className="stat-label">Photos captured per session</span>
+          <div className="about-slide-viewport">
+            <div key={slideIndex} className="about-slide-content">
+              <div className="polaroid-wrapper">
+                <div className="polaroid-card">
+                  <div className="polaroid-tape" />
+                  <img
+                    src={activeSlide.image}
+                    alt={activeSlide.alt}
+                    className={`polaroid-photo${isSticker ? ' is-sticker' : ''}`}
+                  />
+                </div>
               </div>
-              <div className="stat-pill">
-                <span className="stat-num">8</span>
-                <span className="stat-label">Unique frames to choose from</span>
-              </div>
-              <div className="stat-pill">
-                <span className="stat-num">6</span>
-                <span className="stat-label">Live filters — B&amp;W, sepia, vivid &amp; more</span>
+
+              <div className="about-notes-wrapper">
+                <span className="about-slide-badge">{activeSlide.tag}</span>
+                <h3 className="about-notes-title">{activeSlide.title}</h3>
+                <div className="about-ruled-sheet">
+                  <p className="about-text">{activeSlide.text}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Transparency */}
-        <div className="about-section">
-          <p className="section-label">Transparency</p>
-          <h2>Your photos stay yours — always.</h2>
-          <p>Everything happens locally in your browser. We only access your camera to make QuadShot work, and we only do the following:</p>
-          <ul className="data-list">
-            <li><span className="bullet-dot"></span>Stream your camera so you can preview and capture photos.</li>
-            <li><span className="bullet-dot"></span>Apply the frame, filters, and stickers you choose, client-side.</li>
-            <li><span className="bullet-dot"></span>Generate a download so you can save your strip to your device.</li>
-          </ul>
-          <p>That's it. No uploads, no cloud storage, no sharing with third parties — ever.</p>
-        </div>
+          <div className="about-slide-controls">
+            <button type="button" className="about-nav-btn" onClick={prevSlide} aria-label="Previous slide">‹</button>
 
-        {/* Privacy */}
-        <div className="about-section">
-          <p className="section-label">Privacy Policy</p>
-          <h2>Simple by design. Private by default.</h2>
-          <p>QuadShot does not collect personal information — no names, no email addresses, no phone numbers — unless you choose to reach out through the Contact page.</p>
-          <p>If you do contact us, we only use what you share (your name, email, and message) to respond to your query. Nothing else.</p>
-          <p>Photos you take are processed temporarily, in your browser, to enable features like frames and filters. They are never stored on any server and are discarded the moment your session ends.</p>
-          <div className="privacy-chips">
-            <span className="chip">No account required</span>
-            <span className="chip">No server uploads</span>
-            <span className="chip">No data sold</span>
-            <span className="chip">Camera access — local only</span>
+            <div className="about-slide-dots">
+              {ABOUT_SLIDES.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`slide-dot ${idx === slideIndex ? 'active' : ''}`}
+                  onClick={() => setSlideIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            <button type="button" className="about-nav-btn" onClick={nextSlide} aria-label="Next slide">›</button>
           </div>
-        </div>
-
-        {/* Footer note */}
-        <div className="about-footer-note">
-          <span className="heart">🌸</span>
-          <p>QuadShot was made with love to bring a little photobooth magic to everyone. Got a question or a kind word?{' '}
-            <Link to="/contact" style={{ color: 'var(--coral)', textDecoration: 'none', fontWeight: 500 }}>
-              Drop us a note →
-            </Link>
-          </p>
         </div>
       </div>
     </div>
