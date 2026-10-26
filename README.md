@@ -6,7 +6,8 @@
 
 *A nostalgic photobooth experience right from your browser.*
 
-<img src="https://github.com/user-attachments/assets/8edd9451-e0c2-4f18-a405-fa592e04b5a7" alt="Quadshot Preview" width="100%">
+<img src="<img width="1536" height="730" alt="Quadshot Photobooth" src="https://github.com/user-attachments/assets/093518c0-1a75-4c42-be89-8e21e0e12f42" />
+" alt="Quadshot Preview" width="100%">
 
 ![HTML5](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
