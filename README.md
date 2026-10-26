@@ -6,12 +6,13 @@
 
 *A nostalgic photobooth experience right from your browser.*
 
-<img src="<img width="1536" height="730" alt="Quadshot Photobooth" src="https://github.com/user-attachments/assets/093518c0-1a75-4c42-be89-8e21e0e12f42" />
-" alt="Quadshot Preview" width="100%">
+<img width="1536" height="730" alt="Quadshot Preview" src="https://github.com/user-attachments/assets/093518c0-1a75-4c42-be89-8e21e0e12f42" width="100%">
 
-![HTML5](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![JSX](https://img.shields.io/badge/JSX-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Responsive](https://img.shields.io/badge/Responsive-Yes-00C853?style=for-the-badge)
 ![Made with Love](https://img.shields.io/badge/Made%20with-❤️-ff69b4?style=for-the-badge)
 
@@ -21,7 +22,7 @@
 
 # 🌸 About
 
-**Quadshot Photobooth** recreates the magical experience of those cute vintage photobooths we all love—but entirely in your browser!
+**Quadshot Photobooth** recreates the magical experience of those cute vintage photobooths we all love—built with modern React and JSX!
 
 Whether you're capturing memories with friends, taking aesthetic selfies, or creating the perfect profile picture, Quadshot makes every photo feel special.
 
@@ -31,23 +32,15 @@ Think of it as your own little digital photo studio. 📷✨
 
 # 🎀 Features
 
-✨ Live Camera Preview
-
-📸 Four-Frame Photo Strip
-
-🎨 Beautiful Vintage Filters
-
-💖 Cute Stickers & Overlays
-
-🌈 Fun Frame Designs
-
-💾 Download Your Photo Strip
-
-📱 Responsive Design
-
-⚡ Smooth Animations
-
-🎉 Instant Preview
+✨ Live Camera Preview  
+📸 Four-Frame Photo Strip  
+🎨 Beautiful Vintage Filters  
+💖 Cute Stickers & Overlays  
+🌈 Fun Frame Designs  
+💾 Download Your Photo Strip  
+📱 Responsive Design  
+⚡ Smooth Animations  
+🎉 Instant Preview  
 
 ---
 
@@ -55,126 +48,11 @@ Think of it as your own little digital photo studio. 📷✨
 
 - 🌐 HTML5
 - 🎨 CSS3
-- ⚡ JavaScript
+- ⚛️ React
+- 📄 JSX
+- ⚡ Vite
 - 📷 Web Camera API
-- ✨ CSS Animations
 
 ---
 
 # 📂 Project Structure
-
-```
-
----
-
-# 🚀 Getting Started
-
-### Clone the repository
-
-```bash
-git clone https://github.com/yourusername/quadshot-photobooth.git
-```
-
-### Navigate into the project
-
-```bash
-cd quadshot-photobooth
-```
-
-### Open
-
-Simply open:
-
-```
-index.html
-```
-
-in your browser.
-
-No installation required.
-
----
-
-# 🎮 How to Use
-
-1. 📷 Allow camera access.
-2. 😊 Strike your best pose.
-3. 📸 Capture your four photos.
-4. 🎨 Add filters or cute decorations.
-5. 💾 Download your photo strip.
-6. 💖 Share it everywhere!
-
----
-
-# 🌟 Why You'll Love It
-
-- 💕 Cute and aesthetic UI
-- ⚡ Lightweight & fast
-- 📱 Mobile-friendly
-- 🎉 Fun for friends and family
-- 📷 Real photobooth vibes
-
----
-
-# 💡 Future Improvements
-
-- 🌸 More frame themes
-- 🎵 Background music
-- 🎭 GIF & Boomerang mode
-- 🖼 Custom stickers
-- ☁ Cloud save
-- 🌙 Dark mode
-- 📤 Share directly to social media
-
----
-
-# 🤝 Contributing
-
-Contributions are always welcome!
-
-If you have an idea to make Quadshot even cuter or more fun:
-
-1. Fork the project
-2. Create your feature branch
-
-```bash
-git checkout -b feature/amazing-feature
-```
-
-3. Commit your changes
-
-```bash
-git commit -m "Add amazing feature"
-```
-
-4. Push to the branch
-
-```bash
-git push origin feature/amazing-feature
-```
-
-5. Open a Pull Request 🎉
-
----
-
-# ⭐ Show Your Support
-
-If you enjoyed this project,
-
-🌟 Star this repository
-
-🍴 Fork it
-
-💖 Share it with your friends
-
-Every star motivates me to build more awesome projects!
-
----
-
-<div align="center">
-
-### 📸 "Life is better when you capture the little moments."
-
-Made with ❤️ and lots of ✨ aesthetics ✨
-
-</div>
