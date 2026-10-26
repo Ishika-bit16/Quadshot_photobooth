@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 16px;
+  gap: 40px;
   flex-wrap: wrap;
 }
 
@@ -111,19 +111,16 @@
    DECOR PAGE (Decor.jsx)
 ═══════════════════════════════════════════════ */
 
-/* The base stylesheet only ever styles `.card` inside `#snap` — on the
-   decor page `.card` had zero background/padding, which is a big part of
-   why things looked broken/black (backgroundless elements can get
-   auto-inverted to black by browser dark-mode extensions). Give the decor
-   page its own explicit, professional card treatment. */
 #decor {
   min-height: 100vh;
   padding: 1.5rem 1rem 3rem;
+  overflow-x: hidden;
 }
 
 #decor .card {
   position: relative;
-  width: min(1080px, 96%);
+  width: 100%;
+  max-width: 1024px;
   margin: 1.5rem auto;
   min-height: unset;
   background: rgba(255, 255, 255, 0.72);
@@ -137,6 +134,7 @@
   flex-direction: column;
   align-items: center;
   font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
 }
 
 #decor .wordmark {
@@ -152,9 +150,6 @@
   text-align: center;
 }
 
-/* ── Layout: photo strip fixed on the left, controls flexible on the
-   right. Scoped under #decor with an extra class so it always wins
-   regardless of stylesheet load order. ── */
 #decor .strip-composer {
   width: 100%;
   max-width: none;
@@ -181,7 +176,6 @@
   gap: 20px;
 }
 
-/* Stack vertically (photo on top, controls below) on small screens */
 @media (max-width: 760px) {
   #decor .strip-composer {
     flex-direction: column;
@@ -194,8 +188,6 @@
   }
 }
 
-/* ── Photo strip — richer shadow that picks up the current frame color
-   so it reads as a deliberate colored mat, not a dull sliver ── */
 #decor .composed-strip {
   box-shadow:
     0 4px 14px rgba(0, 0, 0, 0.12),
@@ -237,40 +229,54 @@
   gap: 6px;
 }
 
-/* ── Frame color swatches — bigger, saturated, with a glossy highlight
-   and a clear active state so colors read as vivid, not dull ── */
-.frame-picker-row {
+/* ── Frame IMAGE picker (new style for image-based frames) ── */
+.frame-image-picker {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
-.frame-thumb-mini {
+.frame-img-thumb {
   position: relative;
-  width: 52px;
-  height: 68px;
-  border-radius: 12px;
+  width: 58px;
+  height: 80px;
+  border-radius: 10px;
   cursor: pointer;
-  border: none;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.55),
-    inset 0 14px 18px -8px rgba(255, 255, 255, 0.45),
-    0 4px 10px rgba(0, 0, 0, 0.16);
-  filter: saturate(1.2);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 2.5px solid rgba(200, 180, 190, 0.5);
+  background: #f5f0f0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.frame-thumb-mini:hover {
+.frame-img-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.frame-img-thumb:hover {
   transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.frame-thumb-mini.active {
+.frame-img-thumb.active {
+  border-color: var(--coral);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.75),
     0 0 0 3px #fff,
     0 0 0 6px var(--coral),
-    0 8px 18px rgba(0, 0, 0, 0.22);
+    0 8px 18px rgba(0, 0, 0, 0.18);
   transform: translateY(-2px) scale(1.06);
+}
+
+.no-frame-icon {
+  font-size: 1.5rem;
+  color: #bbb;
+  font-weight: 700;
 }
 
 .frame-check {
@@ -290,8 +296,161 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* ── Sticker panel — always visible now, so give it a comfortable
-   fixed-height scroll area instead of a cramped popover ── */
+/* ── Color wheel row ── */
+.color-wheel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-wheel-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.color-wheel-input:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2);
+}
+
+.color-wheel-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-wheel-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.color-wheel-input::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.color-hex-label {
+  font-family: 'DM Sans', monospace;
+  font-size: 0.85rem;
+  color: var(--dark);
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+/* ── Text font picker row ── */
+.text-font-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.text-font-btn {
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(200, 180, 190, 0.5);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.15s ease;
+  color: var(--dark);
+}
+
+.text-font-btn:hover {
+  background: var(--pippin);
+  border-color: var(--coral);
+  transform: translateY(-1px);
+}
+
+/* ── Text editing controls ── */
+.text-edit-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(200, 180, 190, 0.3);
+}
+
+.text-edit-input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--Pastel_Pink);
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.text-edit-input:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(255, 140, 140, 0.2);
+}
+
+.text-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.text-color-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(200, 180, 190, 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+
+.text-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.text-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.text-color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* ── Placed text items ── */
+.placed-text {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: filter 0.1s;
+}
+
+.placed-text:active {
+  cursor: grabbing;
+}
+
+.selected-text {
+  outline: 2px dashed var(--coral);
+  outline-offset: 4px;
+  filter: drop-shadow(0 0 6px rgba(255, 140, 140, 0.5));
+}
+
+/* ── Sticker panel ── */
 .decor-controls .sticker-panel {
   width: 100%;
   max-width: none;
@@ -306,11 +465,12 @@
   max-height: 320px;
 }
 
-/* ── Download row ── */
-#decor .download-row {
+.download-back-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 10px;
 }
 
 .cursor-box {
@@ -327,6 +487,11 @@
     padding: 1rem;
     position: relative;
     overflow: hidden;
+    color: #fff;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    border: none;
+    cursor: pointer;
 }
 
 .cursor-box::before {
@@ -347,8 +512,6 @@
 
 #decor .dl-btn {
   margin-left: 0;
-
-
 }
 
 .dl-btn:disabled {
@@ -357,10 +520,15 @@
 }
 
 #decor .retake-btn {
-  align-self: flex-start;
   background: rgba(0, 0, 0, 0.06);
   color: var(--dark);
   font-family: 'DM Sans', sans-serif;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 #decor .retake-btn:hover {
@@ -371,4 +539,7 @@
   #decor .card { padding: 1.75rem 1.1rem 1.75rem; border-radius: 20px; }
   .decor-controls .sticker-panel { max-height: 260px; }
   .decor-controls .sticker-grid { max-height: 240px; }
-  .cursor-box { width:150px; height: 38px; font-size: 0.59rem; padding: 0.75rem; }}
+  .cursor-box { width:150px; height: 38px; font-size: 0.59rem; padding: 0.75rem; }
+  .frame-img-thumb { width: 48px; height: 66px; }
+  .download-back-row { flex-direction: column; align-items: stretch; }
+}

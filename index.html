@@ -1,23 +1,1863 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quadshot</title>
- <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=The+Nautigal:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;600;700&family=Chewy&display=swap" rel="stylesheet">
-   <style>
-      /* Make React's root div invisible to layout — children behave as direct body children */
-      #root {
-        display: contents;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Quadshot Photobooth – A nostalgic Korean-style digital photo booth. Capture candid moments, customize with frames and stickers, and download your photo strips.">
+  <title>Quadshot Photobooth</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=The+Nautigal:wght@400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@500;700&family=Bubblegum+Sans&family=Pacifico&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wine: { DEFAULT: '#9b3a3b', light: '#b84749', dark: '#7c2e30', deep: '#6b2428' },
+            coral: { DEFAULT: '#FF8C8C', pastel: '#FF7171' },
+            blush: { light: '#fbe7e9', card: '#fee5e7', cardEnd: '#fddfe2', input: '#fef5f6' }
+          },
+          fontFamily: {
+            nautigal: ['"The Nautigal"', 'cursive'],
+            playfair: ['"Playfair Display"', 'serif'],
+            jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
+            dm: ['"DM Sans"', 'sans-serif'],
+            cormorant: ['"Cormorant Garamond"', 'serif'],
+          }
+        }
       }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --c-ink: #6b2428;
+      --c-wine: #9b3a3b;
+      --c-wine-dark: #852e30;
+      --coral: #FF8C8C;
+      --pastel-coral: #FF7171;
+      --pastel-pink: #FFC8C8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center,
+        #FF7171 0%, #FF8C8C 20%, #FFC8C8 42%, #FFE0E0 65%, #FFE8E8 100%);
+      font-family: 'DM Sans', sans-serif;
+      color: #2a1a18;
+      user-select: none;
+    }
+
+    /* Subtle vintage noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ═══ STAR ANIMATION (HOME PAGE ONLY) ═══ */
+    .star-field {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .star-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      animation: starTwinkle var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+    }
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.15; transform: scale(0.6); }
+      50% { opacity: 0.9; transform: scale(1.4); }
+    }
+
+    /* ═══ HOMEPAGE FLOATING STICKERS (SLIDE-OUT) ═══ */
+    #home-stickers-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .home-floating-sticker {
+      position: absolute;
+      filter: drop-shadow(0 6px 12px rgba(155, 58, 59, 0.16));
+      pointer-events: none;
+      opacity: 0;
+      animation:
+        stickerSlideOut 0.85s cubic-bezier(0.2, 0.9, 0.3, 1.15) var(--delay, 0s) forwards,
+        floatCloud 5.5s ease-in-out calc(var(--delay, 0s) + 0.85s) infinite;
+    }
+    @keyframes stickerSlideOut {
+      0% {
+        opacity: 0;
+        transform: translate(var(--origin-x, 0px), var(--origin-y, 0px)) scale(0.15) rotate(0deg);
+      }
+      70% {
+        opacity: 0.95;
+        transform: translate(0, 0) scale(1.1) rotate(calc(var(--rotate, 0deg) + 5deg));
+      }
+      100% {
+        opacity: 0.88;
+        transform: translate(0, 0) scale(1) rotate(var(--rotate, 0deg));
+      }
+    }
+    @keyframes floatCloud {
+      0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
+      50% { transform: translateY(-16px) rotate(calc(var(--rotate, 0deg) + 3deg)); }
+    }
+
+    /* ═══ CORNER STICKERS (TRUE OUTER CORNERS) ═══ */
+    .page-corner-sticker {
+      position: fixed;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 6px 14px rgba(120, 45, 45, 0.2));
+      animation: cornerPulse 6s ease-in-out infinite;
+    }
+    .page-corner-sticker.tl { top: 8px; left: 8px; }
+    .page-corner-sticker.tr { top: 8px; right: 8px; }
+    .page-corner-sticker.bl { bottom: 8px; left: 8px; }
+    .page-corner-sticker.br { bottom: 8px; right: 8px; }
+
+    @keyframes cornerPulse {
+      0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)) scale(1); }
+      50% { transform: translateY(-6px) rotate(calc(var(--rot, 0deg) + 2deg)) scale(1.03); }
+    }
+
+    /* ═══ INTERACTIVE BUBBLE LETTERS ═══ */
+    .bubble-letter {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease;
+      cursor: default;
+    }
+    .bubble-letter.active {
+      transform: translateY(-20px) scale(1.36) rotate(-3deg);
+      color: #7c2e30;
+      text-shadow: 0 12px 24px rgba(124, 46, 48, 0.28);
+    }
+    .bubble-letter.neighbour {
+      transform: translateY(-10px) scale(1.16) rotate(1deg);
+      color: #9b3a3b;
+    }
+    .bubble-letter.far-neighbour {
+      transform: translateY(-5px) scale(1.07);
+    }
+
+    /* ═══ SIGNATURE BUTTON (HOME & CONTACT) ═══ */
+    .btn-signature {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 32px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      background: linear-gradient(135deg, #a83f41 0%, #8b2f31 100%);
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(155, 58, 59, 0.32), 0 2px 6px rgba(0, 0, 0, 0.08);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      isolation: isolate;
+      user-select: none;
+    }
+    .btn-signature::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 70%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+      transform: skewX(-25deg);
+      transition: 0.75s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .btn-signature:hover {
+      transform: translateY(-3px) scale(1.03);
+      background: linear-gradient(135deg, #b84749 0%, #9b3a3b 100%);
+      box-shadow: 0 16px 36px rgba(155, 58, 59, 0.44), 0 0 24px rgba(255, 140, 140, 0.45);
+    }
+    .btn-signature:hover::before {
+      left: 210%;
+      transition: 0.8s ease;
+    }
+    .btn-signature:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 6px 16px rgba(155, 58, 59, 0.35);
+    }
+
+    /* ═══ VIEWFINDER & VIDEO (ZERO GAP, NO CROP) ═══ */
+    .viewfinder-large-container {
+      position: relative;
+      width: 100%;
+      max-width: 660px;
+      aspect-ratio: 16 / 10;
+      margin: 0 auto;
+      border-radius: 36px 26px 34px 28px / 28px 34px 26px 36px;
+      border: 4px solid #FF8C8C;
+      box-shadow: 0 16px 44px rgba(155, 58, 59, 0.2), 0 0 0 6px rgba(255, 200, 200, 0.38);
+      background: #0d0908;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scaleX(-1);
+      border-radius: inherit;
+      margin: 0;
+      padding: 0;
+      background: #0d0908;
+    }
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 40;
+      transition: opacity 0.05s ease;
+    }
+    .flash-overlay.active {
+      opacity: 0.95;
+      animation: flashFade 0.38s ease-out forwards;
+    }
+    @keyframes flashFade {
+      0% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+
+    /* ═══ CONTACT BADGE & TOOLTIP ═══ */
+    .contact-badge-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(214, 130, 142, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .contact-badge-btn:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: 0 10px 24px rgba(214, 130, 142, 0.4);
+      background: #fffafa;
+      border-color: #FF8C8C;
+    }
+    .contact-tooltip {
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-8px);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      border: 1px solid #FF8C8C;
+      border-radius: 14px;
+      padding: 6px 14px;
+      white-space: nowrap;
+      box-shadow: 0 10px 25px rgba(155, 58, 59, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 50;
+    }
+    .group:hover .contact-tooltip {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    /* ═══ CONTACT WAVY BORDER ═══ */
+    .wavy-border {
+      border-radius: 30px;
+      border: 2.5px solid transparent;
+      background-image:
+        linear-gradient(to bottom right, #fee5e7, #fddfe2),
+        repeating-conic-gradient(#FF8C8C 0% 25%, transparent 0% 50%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      position: relative;
+    }
+    .wavy-border::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, #FF8C8C, #FFB8B8, #FF8C8C, #FFD0D0, #FF8C8C);
+      background-size: 300% 300%;
+      animation: wavyShift 6s ease-in-out infinite;
+      z-index: -1;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask-composite: xor;
+      padding: 3px;
+    }
+    @keyframes wavyShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* ═══ VIEW PANEL CONTAINER ═══ */
+    .view-panel {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ═══ SCROLLBARS ═══ */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.25); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(155, 58, 59, 0.35); border-radius: 8px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(155, 58, 59, 0.65); }
+
+    /* ═══ FRAME THUMBNAILS ═══ */
+    .frame-pill-thumb {
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .frame-pill-thumb:hover {
+      transform: scale(1.08) translateY(-2px);
+    }
+    .frame-pill-thumb.active {
+      border-color: #9b3a3b !important;
+      box-shadow: 0 6px 18px rgba(155, 58, 59, 0.32);
+      transform: scale(1.06);
+    }
+
+    /* ═══ DECOR PAGE – FULL DISPLAY FIX ═══ */
+    #view-decor {
+      overflow-y: auto !important;
+      justify-content: flex-start !important;
+      padding-bottom: 24px;
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen max-h-screen text-[#2a1a18]">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       NAVIGATION BAR (WIDENED, 20px TOP MARGIN, CONSISTENT)
+       ═══════════════════════════════════════════════════════════════ -->
+  <header class="relative z-30 flex-shrink-0" style="margin-top: 20px; padding: 0 16px;">
+    <nav id="main-nav" class="max-w-5xl mx-auto h-13 px-8 flex items-center justify-between bg-white/70 backdrop-blur-md border border-white/80 rounded-full shadow-[0_8px_30px_rgba(160,70,60,0.12)]">
+      <!-- Logo -->
+      <a href="javascript:void(0)" onclick="app.navigate('home')" class="font-nautigal text-3xl font-bold text-[#c0504a] tracking-wide hover:opacity-90 transition">
+        Quadshot
+      </a>
+      <!-- Navigation links -->
+      <div class="flex items-center gap-6 sm:gap-10 font-cormorant text-lg font-semibold text-[#6b3535]">
+        <button onclick="app.navigate('home')" class="nav-item hover:text-[#9b3a3b] transition py-1 px-3 rounded-full" data-view="home">Home</button>
+        <button onclick="app.openPhotoCountModal()" class="nav-item hover:text-[#9b3a3b] transition py-1 px-3 rounded-full" data-view="snap">Snaps</button>
+        <button onclick="app.navigate('about')" class="nav-item hover:text-[#9b3a3b] transition py-1 px-3 rounded-full" data-view="about">About</button>
+        <button onclick="app.navigate('contact')" class="nav-item hover:text-[#9b3a3b] transition py-1 px-3 rounded-full" data-view="contact">Contact</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN VIEW CONTAINER
+       ═══════════════════════════════════════════════════════════════ -->
+  <main id="app-container" class="relative z-10 flex-1 flex flex-col justify-center items-center w-full px-4 min-h-0 overflow-hidden">
+
+    <!-- ─────────────────────────────────────────────────────────────
+         VIEW: HOME
+         - Star animation (EXCLUSIVELY here)
+         - 16 floating stickers with slide-out
+         - NO subtitle, NO loaders
+         - Upgraded "Take a Photo" button
+         ───────────────────────────────────────────────────────────── -->
+    <section id="view-home" class="view-panel relative">
+
+      <!-- Star Animation Layer (HOME ONLY) -->
+      <div id="star-field" class="star-field" aria-hidden="true">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- 16 Floating Stickers with Slide-Out -->
+      <div id="home-stickers-layer" aria-hidden="true"></div>
+
+      <div class="relative z-10 flex flex-col items-center justify-center text-center max-w-xl mx-auto my-auto">
+        <!-- Tagline badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 backdrop-blur-sm border border-white/80 text-[#9b3a3b] font-jakarta font-semibold text-xs tracking-wider uppercase mb-5 shadow-sm">
+          <span>Nostalgic Digital Photobooth</span>
+        </div>
+
+        <!-- Hero title with interactive bouncing bubble letters -->
+        <h1 id="bubble-title" class="font-playfair text-6xl sm:text-7xl lg:text-8xl font-extrabold text-[#2a1a18] tracking-wider mb-8 select-none">
+          <span class="bubble-letter" data-idx="0">P</span>
+          <span class="bubble-letter" data-idx="1">H</span>
+          <span class="bubble-letter" data-idx="2">O</span>
+          <span class="bubble-letter" data-idx="3">T</span>
+          <span class="bubble-letter" data-idx="4">O</span>
+          <span class="bubble-letter" data-idx="5">B</span>
+          <span class="bubble-letter" data-idx="6">O</span>
+          <span class="bubble-letter" data-idx="7">O</span>
+          <span class="bubble-letter" data-idx="8">T</span>
+          <span class="bubble-letter" data-idx="9">H</span>
+        </h1>
+
+        <!-- Upgraded "Take a Photo !" Button -->
+        <div class="mt-2">
+          <button onclick="app.openPhotoCountModal()" class="btn-signature text-base sm:text-lg">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+            <span>Take a photo !</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────
+         VIEW: SNAP / VIEWFINDER
+         - Full viewfinder, zero gap with video, non-scrollable
+         - Locked controls (no shifting)
+         - Corner stickers at true outer corners
+         - NO star animation
+         ───────────────────────────────────────────────────────────── -->
+    <section id="view-snap" class="view-panel hidden relative w-full max-w-5xl mx-auto flex flex-col" style="overflow:hidden;">
+
+      <!-- Corner Stickers at TRUE outer corners (fixed positioning) -->
+      <img src="./public/Stickers/qs-bow.png" onerror="this.src='./Stickers/qs-bow.png'" class="page-corner-sticker tl w-16" style="--rot: -10deg;" alt="">
+      <img src="./public/Stickers/qs-envelope.png" onerror="this.src='./Stickers/qs-envelope.png'" class="page-corner-sticker tr w-14" style="--rot: 8deg;" alt="">
+      <img src="./public/Stickers/qs-phone.png" onerror="this.src='./Stickers/qs-phone.png'" class="page-corner-sticker bl w-16" style="--rot: -6deg;" alt="">
+      <img src="./public/Stickers/qs-lock.png" onerror="this.src='./Stickers/qs-lock.png'" class="page-corner-sticker br w-14" style="--rot: 10deg;" alt="">
+
+      <!-- Camera Workspace (Viewfinder + Side Panel) -->
+      <div class="flex-1 w-full flex items-center justify-center gap-4 min-h-0 overflow-hidden px-2 py-1">
+
+        <!-- Large Viewfinder Box (Full size, zero gap) -->
+        <div class="viewfinder-large-container relative">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="snap-canvas" class="hidden"></canvas>
+
+          <!-- Flash overlay -->
+          <div id="flash" class="flash-overlay"></div>
+
+          <!-- Countdown Badge -->
+          <div id="countdown-badge" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/35 backdrop-blur-[2px] text-white pointer-events-none select-none">
+            <span id="countdown-shot-label" class="font-jakarta text-xs sm:text-sm uppercase tracking-widest bg-[#9b3a3b]/90 px-3 py-1 rounded-full mb-3 shadow-lg">Shot 1 of 4</span>
+            <span id="countdown-number" class="font-playfair text-7xl sm:text-9xl font-extrabold text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-pulse">3</span>
+          </div>
+
+          <!-- Camera Permission Prompt -->
+          <div id="camera-prompt" class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-[#160f0e]/95 p-6 text-center text-white">
+            <div class="w-16 h-16 rounded-full bg-[#9b3a3b]/30 flex items-center justify-center text-[#FF8C8C] mb-1">
+              <i data-lucide="camera" class="w-8 h-8"></i>
+            </div>
+            <h3 class="font-playfair text-xl font-bold">Ready for your photoshoot?</h3>
+            <p class="text-xs sm:text-sm text-white/70 max-w-xs">Enable camera permissions to begin striking your poses.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <button onclick="app.startCamera()" class="btn-signature text-sm py-2 px-6">Enable Camera</button>
+              <button onclick="app.useSimulatedCamera()" class="text-xs bg-white/10 hover:bg-white/20 text-white/90 py-2 px-4 rounded-full transition font-jakarta">Try Demo Snaps</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Panel (Locked, stable, no shifting) -->
+        <div class="hidden sm:flex flex-col justify-between w-36 bg-white/75 backdrop-blur-md rounded-3xl p-3 border border-white/80 shadow-[0_10px_30px_rgba(160,70,60,0.1)] flex-shrink-0" style="height: 380px;">
+          <div class="text-center pb-1.5 border-b border-[#9b3a3b]/15">
+            <span class="font-jakarta text-xs font-bold uppercase tracking-wider text-[#9b3a3b]">Live Strip</span>
+            <span id="side-shot-counter" class="text-[11px] block text-stone-500 font-medium">0 / 4 Shots</span>
+          </div>
+
+          <!-- Pre-allocated slot containers -->
+          <div id="side-strip-slots" class="flex-1 flex flex-col justify-around py-1 gap-1.5 overflow-hidden"></div>
+
+          <!-- Review actions (enabled when strip is complete) -->
+          <div id="side-review-actions" class="pt-1.5 border-t border-[#9b3a3b]/15 flex flex-col gap-1 opacity-40 pointer-events-none transition-all duration-300">
+            <button onclick="app.retakeAll()" class="w-full py-1.5 px-2 text-xs font-bold text-stone-700 bg-white/80 hover:bg-white rounded-xl shadow-sm transition">↺ Retake</button>
+            <button onclick="app.proceedToDecor()" class="w-full py-1.5 px-2 text-xs font-bold text-white bg-[#9b3a3b] hover:bg-[#7c2e30] rounded-xl shadow-sm transition">Decorate ✨ →</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Fixed Controls (Filter row + Snap button) — LOCKED IN PLACE -->
+      <div class="w-full bg-white/80 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/90 shadow-[0_10px_35px_rgba(160,70,60,0.12)] flex items-center justify-between gap-4 flex-shrink-0" style="margin-top: 4px;">
+        <!-- Live Filters -->
+        <div class="flex items-center gap-2 overflow-x-auto custom-scroll py-0.5">
+          <span class="text-xs font-bold text-[#9b3a3b] uppercase tracking-wider pl-1 hidden sm:inline">Filters:</span>
+          <button onclick="app.setFilter('none')" data-filter="none" class="filter-pill-btn active px-3 py-1 text-xs font-semibold rounded-full bg-white shadow-sm border border-[#9b3a3b] text-[#9b3a3b] transition">Normal</button>
+          <button onclick="app.setFilter('grayscale')" data-filter="grayscale" class="filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition">B&W Retro</button>
+          <button onclick="app.setFilter('sepia')" data-filter="sepia" class="filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition">Warm Sepia</button>
+          <button onclick="app.setFilter('saturate')" data-filter="saturate" class="filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition">Sunkissed</button>
+          <button onclick="app.setFilter('cool')" data-filter="cool" class="filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition">Cool Dream</button>
+          <button onclick="app.setFilter('invert')" data-filter="invert" class="filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition">Cyber Pop</button>
+        </div>
+
+        <!-- Central Snap Button -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <button id="snap-btn" onclick="app.triggerCaptureSequence()" class="btn-signature py-2 px-6 text-sm font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            <span id="snap-btn-text">Snap</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────
+         VIEW: ABOUT (CLEAN LAYOUT, COMPACT CARDS, NO STAR ANIMATION)
+         ───────────────────────────────────────────────────────────── -->
+    <section id="view-about" class="view-panel hidden relative w-full max-w-4xl mx-auto py-2">
+
+      <!-- Corner Stickers at TRUE outer corners -->
+      <img src="./public/Stickers/qs-bow.png" onerror="this.src='./Stickers/qs-bow.png'" class="page-corner-sticker tl w-16" style="--rot: -10deg;" alt="">
+      <img src="./public/Stickers/qs-envelope.png" onerror="this.src='./Stickers/qs-envelope.png'" class="page-corner-sticker tr w-14" style="--rot: 8deg;" alt="">
+      <img src="./public/Stickers/qs-phone.png" onerror="this.src='./Stickers/qs-phone.png'" class="page-corner-sticker bl w-16" style="--rot: -6deg;" alt="">
+      <img src="./public/Stickers/qs-lock.png" onerror="this.src='./Stickers/qs-lock.png'" class="page-corner-sticker br w-14" style="--rot: 10deg;" alt="">
+
+      <!-- Clean Compact Card -->
+      <div class="relative bg-white/80 backdrop-blur-md rounded-[28px] p-5 sm:p-7 border border-white/85 shadow-[0_16px_40px_rgba(155,58,59,0.12)] w-full max-w-3xl overflow-hidden my-auto">
+
+        <div class="text-center mb-4">
+          <span class="inline-block px-3 py-0.5 bg-rose-100 text-[#9b3a3b] font-jakarta font-bold text-xs uppercase tracking-wider rounded-full mb-1">Our Story</span>
+          <h2 class="font-playfair text-2xl sm:text-3xl font-extrabold text-[#2a1a18]">The Magic of Snaps</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-6 items-center">
+
+          <!-- Polaroid Preview -->
+          <div class="flex justify-center">
+            <div class="relative bg-white p-2.5 pb-8 rounded-lg shadow-lg rotate-[-2deg] hover:rotate-0 transition duration-300 border border-stone-100 max-w-[170px]">
+              <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 w-16 h-5 bg-amber-100/70 border border-amber-200/50 rotate-2 backdrop-blur-[1px]"></div>
+              <img id="about-slide-img" src="./public/about-polaroid.jpg" onerror="this.src='./about-polaroid.jpg'" class="w-full aspect-[4/5] object-cover rounded bg-stone-100" alt="Photobooth Memory">
+              <p id="about-slide-caption" class="font-['Dancing_Script'] text-center text-base text-stone-700 mt-2">Spontaneous Joy ✨</p>
+            </div>
+          </div>
+
+          <!-- Slide Content -->
+          <div class="flex flex-col justify-between h-full">
+            <div>
+              <span id="about-tag" class="font-jakarta text-[11px] font-bold text-rose-500 uppercase tracking-widest block mb-1">01 / ABOUT QUADSHOT</span>
+              <h3 id="about-title" class="font-playfair text-xl font-bold text-[#2a1a18] mb-2">Capturing Candid Nostalgia</h3>
+              <p id="about-text" class="font-cormorant text-base sm:text-lg text-[#6b3535] leading-relaxed">
+                QuadShot was crafted to bring the warm, candid nostalgia of Korean photobooths straight to your web browser. Take spontaneous photos with friends, customize with dreamy frames and stickers, and keep sweet memories alive forever.
+              </p>
+            </div>
+
+            <!-- Slider Navigation -->
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-200">
+              <div class="flex gap-2" id="about-dots">
+                <button onclick="app.setAboutSlide(0)" class="w-2.5 h-2.5 rounded-full bg-[#9b3a3b] transition"></button>
+                <button onclick="app.setAboutSlide(1)" class="w-2.5 h-2.5 rounded-full bg-stone-300 transition"></button>
+                <button onclick="app.setAboutSlide(2)" class="w-2.5 h-2.5 rounded-full bg-stone-300 transition"></button>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="app.prevAboutSlide()" class="w-8 h-8 rounded-full bg-white shadow border border-stone-200 flex items-center justify-center hover:bg-[#9b3a3b] hover:text-white transition text-sm">‹</button>
+                <button onclick="app.nextAboutSlide()" class="w-8 h-8 rounded-full bg-white shadow border border-stone-200 flex items-center justify-center hover:bg-[#9b3a3b] hover:text-white transition text-sm">›</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────
+         VIEW: CONTACT
+         - Wavy border card (NO Gurugram badge, NO telephone graphic)
+         - Vertical Email, Location, GitHub with official icons & hover tooltips
+         - "Send Message" button with smooth transitions
+         - NO star animation
+         ───────────────────────────────────────────────────────────── -->
+    <section id="view-contact" class="view-panel hidden relative w-full h-full flex flex-col items-center justify-between py-2 overflow-hidden">
+
+      <!-- Corner Stickers at TRUE outer corners -->
+      <img src="./public/Stickers/qs-bow.png" onerror="this.src='./Stickers/qs-bow.png'" class="page-corner-sticker tl w-16" style="--rot: -10deg;" alt="">
+      <img src="./public/Stickers/qs-envelope.png" onerror="this.src='./Stickers/qs-envelope.png'" class="page-corner-sticker tr w-14" style="--rot: 8deg;" alt="">
+      <img src="./public/Stickers/qs-phone.png" onerror="this.src='./Stickers/qs-phone.png'" class="page-corner-sticker bl w-16" style="--rot: -6deg;" alt="">
+      <img src="./public/Stickers/qs-lock.png" onerror="this.src='./Stickers/qs-lock.png'" class="page-corner-sticker br w-14" style="--rot: 10deg;" alt="">
+
+      <!-- Title: CONTACT with underline -->
+      <div class="text-center my-auto mb-2 flex flex-col items-center flex-shrink-0">
+        <h2 class="font-playfair text-3xl sm:text-4xl font-bold tracking-[0.28em] text-[#6b2428] uppercase select-none">C O N T A C T</h2>
+        <div class="w-48 h-[1px] bg-[#6b2428]/25 mt-1.5"></div>
+      </div>
+
+      <!-- Central Section: Vertical Badges + Main Card -->
+      <div class="relative flex items-center justify-center w-full max-w-4xl mx-auto px-4 my-auto gap-6 sm:gap-10">
+
+        <!-- Left Floating Badges: Vertically Aligned with Hover Detail Reveal -->
+        <div class="contact-left-badges flex flex-col gap-4 z-30">
+          <!-- Email (Gmail) -->
+          <div class="relative group">
+            <a href="mailto:ishikasogra@gmail.com" class="contact-badge-btn" title="Email Us">
+              <svg class="w-5 h-5 text-[#9b3a3b]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+            </a>
+            <div class="contact-tooltip">
+              <span class="text-[10px] uppercase font-bold text-rose-500 block">Email (Gmail)</span>
+              <span class="font-jakarta text-xs font-semibold text-[#6b2428]">ishikasogra@gmail.com</span>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="relative group">
+            <div class="contact-badge-btn" title="Location">
+              <svg class="w-5 h-5 text-[#9b3a3b]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+            </div>
+            <div class="contact-tooltip">
+              <span class="text-[10px] uppercase font-bold text-rose-500 block">Location</span>
+              <span class="font-jakarta text-xs font-semibold text-[#6b2428]">Gurugram, Haryana, India</span>
+            </div>
+          </div>
+
+          <!-- GitHub -->
+          <div class="relative group">
+            <a href="https://github.com/Ishika-bit16" target="_blank" rel="noopener noreferrer" class="contact-badge-btn" title="GitHub Profile">
+              <svg class="w-5 h-5 text-[#9b3a3b] fill-current" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+              </svg>
+            </a>
+            <div class="contact-tooltip">
+              <span class="text-[10px] uppercase font-bold text-rose-500 block">GitHub Profile</span>
+              <span class="font-jakarta text-xs font-semibold text-[#6b2428]">github.com/Ishika-bit16</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central Contact Card (Wavy Border, NO telephone, NO Gurugram badge) -->
+        <div class="wavy-border relative w-full max-w-[540px] p-6 sm:p-8 bg-gradient-to-br from-[#fee5e7] to-[#fddfe2] z-10">
+          <form id="contact-form" onsubmit="app.handleContactSubmit(event)" class="flex flex-col gap-3.5">
+            <input type="text" id="contact-name" required placeholder="Name" class="w-full px-5 py-3 rounded-[18px] bg-[#fef5f6] border border-transparent focus:border-[#FF8C8C] focus:bg-white focus:outline-none font-playfair text-[#6b2428] text-base placeholder:text-[#a98089] transition shadow-inner">
+            <input type="email" id="contact-email" required placeholder="Email" class="w-full px-5 py-3 rounded-[18px] bg-[#fef5f6] border border-transparent focus:border-[#FF8C8C] focus:bg-white focus:outline-none font-playfair text-[#6b2428] text-base placeholder:text-[#a98089] transition shadow-inner">
+            <textarea id="contact-msg" rows="3" required placeholder="Message" class="w-full px-5 py-3 rounded-[18px] bg-[#fef5f6] border border-transparent focus:border-[#FF8C8C] focus:bg-white focus:outline-none font-playfair text-[#6b2428] text-base placeholder:text-[#a98089] transition shadow-inner resize-none"></textarea>
+
+            <div class="pt-1 flex items-center justify-start">
+              <button type="submit" id="btn-contact-submit" class="btn-signature text-sm py-2.5 px-7">
+                <span>Send Message</span>
+              </button>
+            </div>
+            <div id="contact-status-msg" class="hidden text-xs font-semibold rounded-xl p-2 text-center transition"></div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="text-center font-playfair text-xs tracking-[0.16em] text-[#9b3a3b] uppercase py-2 flex-shrink-0 select-none">
+        © 2024 PHOTOBOOTH CO. | MADE WITH LUV
+      </footer>
+    </section>
+
+    <!-- ─────────────────────────────────────────────────────────────
+         VIEW: DECOR / CUSTOMIZATION
+         - Full display (no cropping)
+         - ALL 173 stickers
+         - Smart frame mapping + solid color fallback
+         ───────────────────────────────────────────────────────────── -->
+    <section id="view-decor" class="view-panel hidden relative w-full max-w-6xl mx-auto py-2 custom-scroll">
+      <div class="text-center mb-3 flex-shrink-0">
+        <h2 class="font-playfair text-2xl sm:text-3xl font-extrabold text-[#2a1a18]">Make it yours ✨</h2>
+        <p class="font-cormorant text-base text-[#6b3535]">Select frames, adjust strip color, and drag cute stickers onto your strip.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start w-full px-2">
+
+        <!-- Left: Composed Photo Strip Preview -->
+        <div class="flex flex-col items-center">
+          <div id="composed-strip-container"
+               class="relative shadow-2xl rounded-2xl overflow-visible transition-all duration-300"
+               style="width: 280px; min-height: 640px; background-color: #FFFFFF;">
+
+            <!-- Photo Slots -->
+            <div id="composed-slots" class="w-full h-full p-3.5 flex flex-col justify-between gap-2.5 relative z-0"></div>
+
+            <!-- Frame Overlay -->
+            <img id="composed-frame-overlay" src="" class="hidden absolute inset-0 w-full h-full object-fill pointer-events-none z-10" alt="">
+
+            <!-- Placed stickers layer -->
+            <div id="placed-stickers-layer" class="absolute inset-0 pointer-events-none z-20 overflow-visible"></div>
+
+            <!-- Placed text layer -->
+            <div id="placed-text-layer" class="absolute inset-0 pointer-events-none z-25 overflow-visible"></div>
+          </div>
+
+          <p class="text-xs text-stone-600 mt-2 font-medium flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-[#9b3a3b]"></i>
+            Drag stickers & text to position, rotate or resize!
+          </p>
+        </div>
+
+        <!-- Right: Customization Controls -->
+        <div class="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/80 shadow-[0_15px_40px_rgba(160,70,60,0.12)] flex flex-col gap-4">
+
+          <!-- 1. Frame Selector -->
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-jakarta text-xs font-bold uppercase tracking-wider text-[#9b3a3b] flex items-center gap-1.5">
+                <i data-lucide="frame" class="w-4 h-4"></i>
+                Select Photo Frame
+              </h3>
+              <span id="frame-count-badge" class="text-[11px] bg-[#9b3a3b]/10 text-[#9b3a3b] font-bold px-2 py-0.5 rounded-full">4-Photo Frames</span>
+            </div>
+            <div id="frame-picker-tray" class="flex gap-2.5 overflow-x-auto custom-scroll py-1.5 px-0.5"></div>
+          </section>
+
+          <!-- 2. Solid Color Fallback -->
+          <section>
+            <h3 class="font-jakarta text-xs font-bold uppercase tracking-wider text-[#9b3a3b] flex items-center gap-1.5 mb-2">
+              <i data-lucide="palette" class="w-4 h-4"></i>
+              Solid Strip Color (Fallback & Backdrop)
+            </h3>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <button onclick="app.setStripColor('#FFFFFF')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-white shadow-sm hover:scale-110 transition" title="Pure White"></button>
+              <button onclick="app.setStripColor('#FFF7F7')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#FFF7F7] shadow-sm hover:scale-110 transition" title="Cream"></button>
+              <button onclick="app.setStripColor('#FFD6DE')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#FFD6DE] shadow-sm hover:scale-110 transition" title="Pastel Pink"></button>
+              <button onclick="app.setStripColor('#E8DEF8')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#E8DEF8] shadow-sm hover:scale-110 transition" title="Lavender"></button>
+              <button onclick="app.setStripColor('#DDEBCE')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#DDEBCE] shadow-sm hover:scale-110 transition" title="Sage Green"></button>
+              <button onclick="app.setStripColor('#FFF3C4')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#FFF3C4] shadow-sm hover:scale-110 transition" title="Buttercup"></button>
+              <button onclick="app.setStripColor('#823A3A')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#823A3A] shadow-sm hover:scale-110 transition" title="Wine Berry"></button>
+              <button onclick="app.setStripColor('#1E1B1B')" class="w-7 h-7 rounded-full border-2 border-stone-300 bg-[#1E1B1B] shadow-sm hover:scale-110 transition" title="Noir Dark"></button>
+              <div class="flex items-center gap-2 ml-auto">
+                <input type="color" id="strip-color-input" value="#FFFFFF" onchange="app.setStripColor(this.value)" class="w-8 h-8 p-0.5 rounded-lg border border-stone-300 cursor-pointer bg-white">
+                <span id="strip-color-hex" class="text-xs font-mono font-bold text-stone-600 uppercase">#FFFFFF</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Add Custom Text Captions -->
+          <section>
+            <h3 class="font-jakarta text-xs font-bold uppercase tracking-wider text-[#9b3a3b] flex items-center gap-1.5 mb-2">
+              <i data-lucide="type" class="w-4 h-4"></i>
+              Add Caption / Text
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="app.addTextCaption('Dancing Script')" class="px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-['Dancing_Script'] hover:border-[#9b3a3b] transition">Calligraphy</button>
+              <button onclick="app.addTextCaption('Bubblegum Sans')" class="px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-['Bubblegum_Sans'] hover:border-[#9b3a3b] transition">Bubbly</button>
+              <button onclick="app.addTextCaption('Pacifico')" class="px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-['Pacifico'] hover:border-[#9b3a3b] transition">Curvy</button>
+              <button onclick="app.addTextCaption('Playfair Display')" class="px-3 py-1 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-playfair hover:border-[#9b3a3b] transition">Classic</button>
+            </div>
+            <!-- Active Text Toolbar -->
+            <div id="text-edit-toolbar" class="hidden mt-2 p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex flex-wrap items-center gap-2">
+              <input type="text" id="text-edit-input" placeholder="Type caption..." oninput="app.updateActiveText(this.value)" class="flex-1 min-w-[120px] px-2.5 py-1 text-xs bg-white rounded-lg border border-stone-300">
+              <input type="color" id="text-color-picker" value="#2a1a18" onchange="app.updateActiveTextColor(this.value)" class="w-6 h-6 rounded border cursor-pointer">
+              <button onclick="app.rotateActiveText(-15)" class="p-1 px-2 bg-white rounded border text-xs" title="Rotate Left">⟲</button>
+              <button onclick="app.rotateActiveText(15)" class="p-1 px-2 bg-white rounded border text-xs" title="Rotate Right">⟳</button>
+              <button onclick="app.deleteActiveText()" class="p-1 px-2 bg-rose-50 text-rose-600 rounded border border-rose-200 text-xs font-bold" title="Delete">✕</button>
+            </div>
+          </section>
+
+          <!-- 4. Complete Sticker Collection Drawer (ALL 173 Sticker Assets) -->
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <h3 class="font-jakarta text-xs font-bold uppercase tracking-wider text-[#9b3a3b] flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  Sticker Drawer
+                </h3>
+                <span id="sticker-total-badge" class="text-[10px] bg-rose-100 text-[#9b3a3b] font-bold px-2 py-0.5 rounded-full">173 Stickers</span>
+              </div>
+              <!-- Active Sticker Actions -->
+              <div id="sticker-active-actions" class="hidden items-center gap-1">
+                <button onclick="app.scaleActiveSticker(-0.15)" class="p-1 bg-white hover:bg-stone-100 rounded border border-stone-200 text-xs font-bold px-2" title="Smaller">➖</button>
+                <button onclick="app.scaleActiveSticker(0.15)" class="p-1 bg-white hover:bg-stone-100 rounded border border-stone-200 text-xs font-bold px-2" title="Larger">➕</button>
+                <button onclick="app.rotateActiveSticker(-15)" class="p-1 bg-white hover:bg-stone-100 rounded border border-stone-200 text-xs font-bold px-2" title="Rotate Left">⟲</button>
+                <button onclick="app.rotateActiveSticker(15)" class="p-1 bg-white hover:bg-stone-100 rounded border border-stone-200 text-xs font-bold px-2" title="Rotate Right">⟳</button>
+                <button onclick="app.deleteActiveSticker()" class="p-1 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded text-xs font-bold px-2" title="Delete">✕</button>
+              </div>
+            </div>
+            <!-- Scrollable Sticker Grid -->
+            <div id="stickers-tray" class="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-10 gap-2 max-h-44 overflow-y-auto custom-scroll p-2 bg-white/50 rounded-2xl border border-stone-200"></div>
+          </section>
+
+          <!-- Action buttons -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-stone-200">
+            <button onclick="app.navigate('snap')" class="text-xs font-bold text-stone-600 hover:text-[#9b3a3b] flex items-center gap-1.5 transition">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              Back to Camera
+            </button>
+            <button onclick="app.downloadPhotostrip()" class="btn-signature text-sm py-2.5 px-6">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download Strip</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PHOTO COUNT SELECTION MODAL
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="photo-count-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="relative bg-white/95 backdrop-blur-xl p-6 sm:p-8 max-w-lg w-full text-center shadow-2xl rounded-3xl border-2 border-stone-200">
+
+      <button onclick="app.closePhotoCountModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 p-1 rounded-full transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <span class="inline-block px-3 py-1 bg-rose-100 text-[#9b3a3b] font-jakarta font-bold text-xs uppercase tracking-wider rounded-full mb-3">Photoshoot Setup</span>
+
+      <h3 class="font-playfair text-2xl sm:text-3xl font-extrabold text-[#2a1a18] mb-2">How many photos would you like to take?</h3>
+      <p class="font-cormorant text-base text-[#6b3535] mb-6">Choose your strip format to automatically load the matching frames and shot count.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <!-- 3 Photos -->
+        <button onclick="app.selectPhotoCount(3)" class="group p-5 rounded-2xl border-2 border-stone-200 hover:border-[#9b3a3b] bg-white/80 hover:bg-rose-50/50 shadow-sm hover:shadow-md transition text-left flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-playfair text-3xl font-extrabold text-[#9b3a3b]">3</span>
+              <span class="text-xs bg-rose-100 text-[#9b3a3b] font-bold px-2 py-0.5 rounded-full">Trio Strip</span>
+            </div>
+            <h4 class="font-jakarta text-sm font-bold text-[#2a1a18] mb-1">3 Snaps</h4>
+            <p class="text-xs text-stone-500 font-medium">Loads 3-frame folder & captures 3 poses.</p>
+          </div>
+          <div class="mt-4 flex gap-1.5 justify-center py-2 bg-stone-100 rounded-lg group-hover:bg-rose-100/60 transition">
+            <span class="w-5 h-6 bg-stone-300 rounded-sm"></span>
+            <span class="w-5 h-6 bg-stone-300 rounded-sm"></span>
+            <span class="w-5 h-6 bg-stone-300 rounded-sm"></span>
+          </div>
+        </button>
+
+        <!-- 4 Photos -->
+        <button onclick="app.selectPhotoCount(4)" class="group p-5 rounded-2xl border-2 border-[#9b3a3b] bg-rose-50/40 hover:bg-rose-50/80 shadow-md hover:shadow-lg transition text-left flex flex-col justify-between relative">
+          <div class="absolute -top-3 right-4 bg-[#9b3a3b] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Popular</div>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-playfair text-3xl font-extrabold text-[#9b3a3b]">4</span>
+              <span class="text-xs bg-rose-200 text-[#7c2e30] font-bold px-2 py-0.5 rounded-full">Quad Strip</span>
+            </div>
+            <h4 class="font-jakarta text-sm font-bold text-[#2a1a18] mb-1">4 Snaps</h4>
+            <p class="text-xs text-stone-500 font-medium">Loads 4-frame folder & captures 4 poses.</p>
+          </div>
+          <div class="mt-4 flex gap-1.5 justify-center py-2 bg-rose-100/60 rounded-lg transition">
+            <span class="w-4 h-6 bg-[#9b3a3b]/40 rounded-sm"></span>
+            <span class="w-4 h-6 bg-[#9b3a3b]/40 rounded-sm"></span>
+            <span class="w-4 h-6 bg-[#9b3a3b]/40 rounded-sm"></span>
+            <span class="w-4 h-6 bg-[#9b3a3b]/40 rounded-sm"></span>
+          </div>
+        </button>
+      </div>
+
+      <p class="text-xs text-stone-400">You can customize frames, colors, and stickers on the next step.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       COMPLETE PHOTOBOOTH JAVASCRIPT ENGINE (CLEAN REFACTORED)
+       ═══════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ═══ DATA: 16 Floating Stickers for Home Page ═══ */
+    const HOME_STICKERS = [
+      { src: 'png-40.svg',  top: 13.0, left: 50.0, size: 56, rotate: -12, delay: 0.05, ox: 0,   oy: 150 },
+      { src: 'png-55.svg',  top: 19.5, left: 63.5, size: 68, rotate: 8,   delay: 0.12, ox: -120, oy: 120 },
+      { src: 'png-66.svg',  top: 23.0, left: 77.0, size: 62, rotate: -6,  delay: 0.18, ox: -180, oy: 80 },
+      { src: 'png-90.svg',  top: 35.0, left: 81.5, size: 74, rotate: 14,  delay: 0.24, ox: -200, oy: 0 },
+      { src: 'png-68.svg',  top: 46.0, left: 87.5, size: 58, rotate: -10, delay: 0.30, ox: -220, oy: -40 },
+      { src: 'png-44.svg',  top: 56.0, left: 79.0, size: 70, rotate: 5,   delay: 0.36, ox: -170, oy: -100 },
+      { src: 'png-71.svg',  top: 67.0, left: 76.5, size: 64, rotate: -14, delay: 0.42, ox: -140, oy: -140 },
+      { src: 'png-14.svg',  top: 71.0, left: 63.0, size: 78, rotate: 10,  delay: 0.48, ox: -80, oy: -160 },
+      { src: 'png-163.svg', top: 76.5, left: 50.0, size: 56, rotate: -8,  delay: 0.08, ox: 0,   oy: -160 },
+      { src: 'png-147.svg', top: 69.0, left: 37.5, size: 66, rotate: 12,  delay: 0.16, ox: 80,  oy: -150 },
+      { src: 'png-126.svg', top: 67.0, left: 23.0, size: 60, rotate: -5,  delay: 0.22, ox: 140, oy: -130 },
+      { src: 'png-109.svg', top: 55.0, left: 18.5, size: 74, rotate: 15,  delay: 0.28, ox: 180, oy: -70 },
+      { src: 'png-102.svg', top: 45.0, left: 12.0, size: 54, rotate: -11, delay: 0.34, ox: 210, oy: -20 },
+      { src: 'png-100.svg', top: 34.0, left: 20.5, size: 68, rotate: 7,   delay: 0.40, ox: 180, oy: 50 },
+      { src: 'png-88.svg',  top: 22.0, left: 23.0, size: 62, rotate: -13, delay: 0.46, ox: 150, oy: 100 },
+      { src: 'png-73.svg',  top: 17.5, left: 36.5, size: 72, rotate: 9,   delay: 0.52, ox: 90,  oy: 130 },
+    ];
+
+    /* ═══ DATA: Frames Configuration ═══ */
+    const FRAMES_CONFIG = {
+      3: [
+        { id: 'none', label: 'No Frame (Solid Color)', src: null, thumbText: '✕' },
+        { id: '3_1', label: 'Vintage Ivory', src: './public/Frames/frame-3/frame 1.jpg', altSrc: './Frames/frame-3/frame 1.jpg' },
+        { id: '3_2', label: 'Studio Clean', src: './public/Frames/frame-3/frame 2.jpg', altSrc: './Frames/frame-3/frame 2.jpg' },
+        { id: '3_3', label: 'Cutout Strip (PNG)', src: './public/Frames/frame-3/frame 3.png', altSrc: './Frames/frame-3/frame 3.png', isPng: true },
+        { id: '3_4', label: 'Warm Retro', src: './public/Frames/frame-3/frame 4.jpg', altSrc: './Frames/frame-3/frame 4.jpg' },
+        { id: '3_5', label: 'Pastel Bloom', src: './public/Frames/frame-3/frame 5.jpg', altSrc: './Frames/frame-3/frame 5.jpg' },
+        { id: '3_6', label: 'Classic Strip', src: './public/Frames/frame-3/frame.jpg', altSrc: './Frames/frame-3/frame.jpg' },
+      ],
+      4: [
+        { id: 'none', label: 'No Frame (Solid Color)', src: null, thumbText: '✕' },
+        { id: '4_1', label: 'Polaroid Ivory', src: './public/Frames/frame-4/frame 1.jpg', altSrc: './Frames/frame-4/frame 1.jpg' },
+        { id: '4_2', label: 'Photo Studio 4', src: './public/Frames/frame-4/frame 2.jpg', altSrc: './Frames/frame-4/frame 2.jpg' },
+        { id: '4_3', label: 'Minimal Slate', src: './public/Frames/frame-4/frame 3.jpg', altSrc: './Frames/frame-4/frame 3.jpg' },
+        { id: '4_4', label: 'Cutout Strip (PNG)', src: './public/Frames/frame-4/frame 4.png', altSrc: './Frames/frame-4/frame 4.png', isPng: true },
+        { id: '4_5', label: 'Retro Quad', src: './public/Frames/frame-4/frame 5.jpg', altSrc: './Frames/frame-4/frame 5.jpg' },
+        { id: '4_6', label: 'Korean Booth Cut', src: './public/Frames/frame-4/frame 6.jpg', altSrc: './Frames/frame-4/frame 6.jpg' },
+      ]
+    };
+
+    /* ═══ DATA: All 173 Sticker Assets ═══ */
+    function buildAllStickersList() {
+      const list = ['qs-bow.png', 'qs-envelope.png', 'qs-lock.png', 'qs-phone.png', 'qs-photostrips.png', 'png.svg'];
+      for (let i = 1; i <= 167; i++) list.push(`png-${i}.svg`);
+      return list;
+    }
+    const ALL_STICKER_FILES = buildAllStickersList();
+
+    /* ═══ DATA: Live Filter CSS Mappings ═══ */
+    const LIVE_FILTERS = {
+      none: 'none',
+      grayscale: 'grayscale(100%)',
+      sepia: 'sepia(85%) contrast(105%)',
+      saturate: 'saturate(200%) hue-rotate(8deg)',
+      cool: 'hue-rotate(185deg) saturate(125%)',
+      invert: 'invert(100%)',
+    };
+
+    /* ═══ DATA: About Slides ═══ */
+    const ABOUT_SLIDES = [
+      {
+        tag: '01 / ABOUT QUADSHOT',
+        title: 'Capturing Candid Nostalgia',
+        text: 'QuadShot was crafted to bring the warm, candid nostalgia of Korean photobooths straight to your web browser. Take spontaneous photos with friends, customize with dreamy frames and stickers, and keep sweet memories alive forever.',
+        caption: 'Spontaneous Joy ✨',
+        img: './public/about-polaroid.jpg',
+        altImg: './about-polaroid.jpg'
+      },
+      {
+        tag: '02 / HOW IT WORKS',
+        title: 'Strike a Pose, Style & Cherish',
+        text: '1. Select 3 or 4 photos to match your style.\n2. Pose as the animated countdown counts down with live camera flashes.\n3. Decorate with customizable frames, solid palettes, stickers and captions.\n4. Download your crisp photostrip in high-definition!',
+        caption: 'Pose & Style 🎞️',
+        img: './public/Stickers/qs-photostrips.png',
+        altImg: './Stickers/qs-photostrips.png'
+      },
+      {
+        tag: '03 / PRIVATE & LOCAL',
+        title: 'Your Snaps Stay 100% Yours',
+        text: 'Your privacy is paramount. Everything happens purely in your browser: camera streams, frame overlays, sticker compositions, and downloads. Zero photos are ever uploaded to any cloud server.',
+        caption: 'Safe & Private 🔒',
+        img: './public/Stickers/qs-lock.png',
+        altImg: './Stickers/qs-lock.png'
+      }
+    ];
+
+    /* ═══ SFX: Web Audio Synthesizer ═══ */
+    class SoundEngine {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx && typeof AudioContext !== 'undefined')
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      playClick() {
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.frequency.setValueAtTime(750, this.ctx.currentTime);
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+          osc.start(); osc.stop(this.ctx.currentTime + 0.06);
+        } catch(e) {}
+      }
+      playShutter() {
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+          osc.type = 'triangle';
+          gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+          osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+        } catch(e) {}
+      }
+    }
+    const sound = new SoundEngine();
+
+    /* ═══ MAIN APPLICATION ═══ */
+    class PhotoboothApp {
+      constructor() {
+        this.currentView = 'home';
+        this.photoCount = 4;
+        this.snaps = [];
+        this.selectedFilter = 'none';
+        this.selectedFrameId = 'none';
+        this.stripColor = '#FFFFFF';
+        this.stream = null;
+        this.cameraReady = false;
+        this.isCounting = false;
+        this.isSimulated = false;
+        this.placedStickers = [];
+        this.activeStickerId = null;
+        this.placedTexts = [];
+        this.activeTextId = null;
+        this.aboutSlideIdx = 0;
+      }
+
+      init() {
+        this.initStarField();
+        this.initHomeStickers();
+        this.initBubbleLetters();
+        this.initStickerTray();
+        this.navigate('home');
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      /* ─── Star Field (HOME PAGE ONLY) ─── */
+      initStarField() {
+        const field = document.getElementById('star-field');
+        if (!field) return;
+        field.innerHTML = '';
+        for (let i = 0; i < 40; i++) {
+          const star = document.createElement('div');
+          star.className = 'star-particle';
+          star.style.top = `${Math.random() * 100}%`;
+          star.style.left = `${Math.random() * 100}%`;
+          star.style.setProperty('--dur', `${2 + Math.random() * 4}s`);
+          star.style.setProperty('--delay', `${Math.random() * 3}s`);
+          star.style.width = `${2 + Math.random() * 3}px`;
+          star.style.height = star.style.width;
+          field.appendChild(star);
+        }
+      }
+
+      /* ─── Navigation Router ─── */
+      navigate(viewName) {
+        sound.playClick();
+        this.currentView = viewName;
+
+        // Hide all views
+        document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+
+        // Show target
+        const target = document.getElementById(`view-${viewName}`);
+        if (target) target.classList.remove('hidden');
+
+        // Active nav styling
+        document.querySelectorAll('.nav-item').forEach(btn => {
+          if (btn.dataset.view === viewName) {
+            btn.classList.add('bg-white/80', 'text-[#9b3a3b]', 'shadow-sm');
+          } else {
+            btn.classList.remove('bg-white/80', 'text-[#9b3a3b]', 'shadow-sm');
+          }
+        });
+
+        // Toggle corner stickers visibility per page
+        document.querySelectorAll('.page-corner-sticker').forEach(s => {
+          s.style.display = (viewName === 'snap' || viewName === 'about' || viewName === 'contact') ? 'block' : 'none';
+        });
+
+        // Star field only on home
+        const starField = document.getElementById('star-field');
+        if (starField) starField.style.display = viewName === 'home' ? 'block' : 'none';
+
+        // View-specific hooks
+        if (viewName === 'snap') this.prepareSnapView();
+        else if (viewName === 'decor') this.renderComposedStrip();
+
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      /* ─── Floating Stickers (Home Page) ─── */
+      initHomeStickers() {
+        const container = document.getElementById('home-stickers-layer');
+        if (!container) return;
+        container.innerHTML = '';
+        HOME_STICKERS.forEach(s => {
+          const img = document.createElement('img');
+          img.src = `./public/Stickers/${s.src}`;
+          img.onerror = () => { img.src = `./Stickers/${s.src}`; };
+          img.className = 'home-floating-sticker';
+          img.style.top = `${s.top}%`;
+          img.style.left = `${s.left}%`;
+          img.style.width = `${s.size}px`;
+          img.style.height = `${s.size}px`;
+          img.style.setProperty('--rotate', `${s.rotate}deg`);
+          img.style.setProperty('--delay', `${s.delay}s`);
+          img.style.setProperty('--origin-x', `${s.ox}px`);
+          img.style.setProperty('--origin-y', `${s.oy}px`);
+          img.alt = '';
+          container.appendChild(img);
+        });
+      }
+
+      /* ─── Photo Count Modal ─── */
+      openPhotoCountModal() {
+        sound.playClick();
+        const modal = document.getElementById('photo-count-modal');
+        if (modal) modal.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      closePhotoCountModal() {
+        const modal = document.getElementById('photo-count-modal');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      selectPhotoCount(count) {
+        sound.playClick();
+        this.photoCount = count;
+        this.snaps = [];
+        this.selectedFrameId = 'none';
+        this.closePhotoCountModal();
+
+        const badge = document.getElementById('frame-count-badge');
+        if (badge) badge.innerText = `${count}-Photo Frames`;
+
+        this.initFramePickerTray();
+        this.navigate('snap');
+      }
+
+      /* ─── Snap View: Stable Layout ─── */
+      prepareSnapView() {
+        const container = document.getElementById('side-strip-slots');
+        const counter = document.getElementById('side-shot-counter');
+        const reviewActions = document.getElementById('side-review-actions');
+
+        if (counter) counter.innerText = `${this.snaps.length} / ${this.photoCount} Shots`;
+        if (reviewActions) {
+          if (this.snaps.length >= this.photoCount) {
+            reviewActions.classList.remove('opacity-40', 'pointer-events-none');
+          } else {
+            reviewActions.classList.add('opacity-40', 'pointer-events-none');
+          }
+        }
+
+        // Pre-allocate slots
+        if (container) {
+          container.innerHTML = '';
+          for (let i = 0; i < this.photoCount; i++) {
+            const slot = document.createElement('div');
+            slot.id = `side-slot-${i}`;
+            if (this.snaps[i]) {
+              slot.className = 'w-full flex-1 max-h-[88px] rounded-xl border-2 border-white shadow-sm overflow-hidden relative';
+              slot.innerHTML = `<img src="${this.snaps[i]}" class="w-full h-full object-cover" alt="Shot ${i + 1}">`;
+            } else {
+              slot.className = 'w-full flex-1 max-h-[88px] rounded-xl border-2 border-dashed border-stone-300 bg-white/40 overflow-hidden flex items-center justify-center relative transition-all';
+              slot.innerHTML = `<span class="text-[10px] font-jakarta font-bold text-stone-400">Shot ${i + 1}</span>`;
+            }
+            container.appendChild(slot);
+          }
+        }
+
+        // Camera prompt
+        if (!this.stream && !this.isSimulated) {
+          const prompt = document.getElementById('camera-prompt');
+          if (prompt) prompt.classList.remove('hidden');
+        }
+      }
+
+      /* ─── Camera ─── */
+      async startCamera() {
+        sound.playClick();
+        const video = document.getElementById('video');
+        const prompt = document.getElementById('camera-prompt');
+        try {
+          this.stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+            audio: false
+          });
+          video.srcObject = this.stream;
+          video.onloadedmetadata = () => {
+            this.cameraReady = true;
+            if (prompt) prompt.classList.add('hidden');
+          };
+          await video.play();
+          this.cameraReady = true;
+          if (prompt) prompt.classList.add('hidden');
+        } catch (err) {
+          console.warn('Camera unavailable, switching to demo.', err);
+          this.useSimulatedCamera();
+        }
+      }
+
+      useSimulatedCamera() {
+        sound.playClick();
+        this.isSimulated = true;
+        this.cameraReady = true;
+        const prompt = document.getElementById('camera-prompt');
+        if (prompt) prompt.classList.add('hidden');
+
+        const canvas = document.getElementById('snap-canvas');
+        const video = document.getElementById('video');
+        canvas.width = 640; canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        let hue = 0;
+        const renderLoop = () => {
+          if (!this.isSimulated) return;
+          hue = (hue + 1) % 360;
+          ctx.fillStyle = `hsl(${hue}, 60%, 75%)`;
+          ctx.fillRect(0, 0, 640, 400);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 36px "Plus Jakarta Sans"';
+          ctx.textAlign = 'center';
+          ctx.fillText('✨ Live Demo Camera', 320, 180);
+          ctx.font = '20px "DM Sans"';
+          ctx.fillText('Strike your best pose!', 320, 220);
+          requestAnimationFrame(renderLoop);
+        };
+        renderLoop();
+        const stream = canvas.captureStream(30);
+        video.srcObject = stream;
+        video.play();
+      }
+
+      /* ─── Filter ─── */
+      setFilter(filterKey) {
+        sound.playClick();
+        this.selectedFilter = filterKey;
+        const video = document.getElementById('video');
+        if (video) video.style.filter = LIVE_FILTERS[filterKey] || 'none';
+
+        document.querySelectorAll('.filter-pill-btn').forEach(btn => {
+          if (btn.dataset.filter === filterKey) {
+            btn.className = 'filter-pill-btn active px-3 py-1 text-xs font-semibold rounded-full bg-white shadow-sm border border-[#9b3a3b] text-[#9b3a3b] transition';
+          } else {
+            btn.className = 'filter-pill-btn px-3 py-1 text-xs font-semibold rounded-full bg-stone-100 hover:bg-white text-stone-600 transition';
+          }
+        });
+      }
+
+      /* ─── Capture Sequence ─── */
+      triggerCaptureSequence() {
+        if (!this.cameraReady || this.isCounting) return;
+        sound.playClick();
+        this.snaps = [];
+        this.prepareSnapView();
+        this.isCounting = true;
+
+        const snapBtn = document.getElementById('snap-btn');
+        if (snapBtn) snapBtn.disabled = true;
+
+        let currentShot = 0;
+        const total = this.photoCount;
+
+        const runCountdownAndShoot = () => {
+          if (currentShot >= total) {
+            this.isCounting = false;
+            if (snapBtn) snapBtn.disabled = false;
+            const badge = document.getElementById('countdown-badge');
+            if (badge) badge.classList.add('hidden');
+            const reviewActions = document.getElementById('side-review-actions');
+            if (reviewActions) reviewActions.classList.remove('opacity-40', 'pointer-events-none');
+            return;
+          }
+          let countdownSecs = 3;
+          const badge = document.getElementById('countdown-badge');
+          const shotLabel = document.getElementById('countdown-shot-label');
+          const numSpan = document.getElementById('countdown-number');
+
+          if (badge) badge.classList.remove('hidden');
+          if (shotLabel) shotLabel.innerText = `Pose for Shot ${currentShot + 1} of ${total} 📸`;
+          if (numSpan) numSpan.innerText = countdownSecs;
+
+          const timer = setInterval(() => {
+            countdownSecs--;
+            if (countdownSecs > 0) {
+              if (numSpan) numSpan.innerText = countdownSecs;
+              sound.playClick();
+            } else {
+              clearInterval(timer);
+              if (badge) badge.classList.add('hidden');
+              this.captureSingleSnap(currentShot);
+              currentShot++;
+              setTimeout(runCountdownAndShoot, 800);
+            }
+          }, 1000);
+        };
+        runCountdownAndShoot();
+      }
+
+      captureSingleSnap(shotIndex) {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('snap-canvas');
+        if (!video || !canvas) return;
+
+        const w = video.videoWidth || 640;
+        const h = video.videoHeight || 400;
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+        ctx.filter = LIVE_FILTERS[this.selectedFilter] || 'none';
+        ctx.drawImage(video, 0, 0, w, h);
+        ctx.filter = 'none';
+
+        const dataURL = canvas.toDataURL('image/png');
+        this.snaps.push(dataURL);
+
+        sound.playShutter();
+        const flash = document.getElementById('flash');
+        if (flash) { flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 380); }
+
+        const slot = document.getElementById(`side-slot-${shotIndex}`);
+        if (slot) {
+          slot.className = 'w-full flex-1 max-h-[88px] rounded-xl border-2 border-white shadow-sm overflow-hidden relative';
+          slot.innerHTML = `<img src="${dataURL}" class="w-full h-full object-cover" alt="Shot ${shotIndex + 1}">`;
+        }
+        const counter = document.getElementById('side-shot-counter');
+        if (counter) counter.innerText = `${this.snaps.length} / ${this.photoCount} Shots`;
+      }
+
+      retakeAll() {
+        sound.playClick();
+        this.snaps = [];
+        this.prepareSnapView();
+        this.triggerCaptureSequence();
+      }
+
+      proceedToDecor() {
+        sound.playClick();
+        if (this.snaps.length === 0) return;
+        this.navigate('decor');
+      }
+
+      /* ─── Frame Tray ─── */
+      initFramePickerTray() {
+        const tray = document.getElementById('frame-picker-tray');
+        if (!tray) return;
+        tray.innerHTML = '';
+        const frames = FRAMES_CONFIG[this.photoCount] || FRAMES_CONFIG[4];
+
+        frames.forEach(f => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `frame-pill-thumb flex-shrink-0 w-16 h-20 rounded-xl border-2 overflow-hidden flex flex-col items-center justify-center p-1 relative bg-white/90 ${this.selectedFrameId === f.id ? 'active' : 'border-stone-200'}`;
+          btn.title = f.label;
+          btn.onclick = () => this.selectFrame(f.id);
+
+          if (f.src) {
+            btn.innerHTML = `
+              <img src="${f.src}" onerror="this.src='${f.altSrc}'; if(!this.dataset.tried){this.dataset.tried=1;}" class="w-full h-full object-cover rounded-lg" alt="${f.label}">
+              <span class="absolute bottom-1 bg-black/60 text-white text-[9px] px-1 rounded truncate max-w-[56px]">${f.label}</span>
+            `;
+          } else {
+            btn.innerHTML = `
+              <div class="w-full h-full rounded-lg bg-stone-100 flex flex-col items-center justify-center text-stone-500">
+                <span class="text-base font-bold">✕</span>
+                <span class="text-[9px] font-semibold">Solid</span>
+              </div>
+            `;
+          }
+          tray.appendChild(btn);
+        });
+      }
+
+      selectFrame(frameId) {
+        sound.playClick();
+        this.selectedFrameId = frameId;
+        this.initFramePickerTray();
+        this.renderComposedStrip();
+      }
+
+      setStripColor(hex) {
+        sound.playClick();
+        this.stripColor = hex;
+        const colorInput = document.getElementById('strip-color-input');
+        const colorHex = document.getElementById('strip-color-hex');
+        if (colorInput) colorInput.value = hex;
+        if (colorHex) colorHex.innerText = hex.toUpperCase();
+        this.renderComposedStrip();
+      }
+
+      /* ─── Composed Strip Renderer ─── */
+      renderComposedStrip() {
+        const stripContainer = document.getElementById('composed-strip-container');
+        const slotsContainer = document.getElementById('composed-slots');
+        const frameOverlay = document.getElementById('composed-frame-overlay');
+        if (!stripContainer || !slotsContainer) return;
+
+        stripContainer.style.backgroundColor = this.stripColor;
+
+        slotsContainer.innerHTML = '';
+        const count = this.photoCount;
+        const photos = this.snaps.length > 0 ? this.snaps : Array(count).fill('');
+
+        photos.forEach((src, idx) => {
+          const slot = document.createElement('div');
+          const slotHeight = count === 3 ? 'h-[185px]' : 'h-[138px]';
+          slot.className = `w-full ${slotHeight} rounded-xl overflow-hidden shadow-inner bg-stone-200 relative`;
+          if (src) {
+            slot.innerHTML = `<img src="${src}" class="w-full h-full object-cover" alt="Strip Photo ${idx + 1}">`;
+          } else {
+            slot.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-stone-100 text-stone-400 font-jakarta text-xs font-semibold">Snap ${idx + 1}</div>`;
+          }
+          slotsContainer.appendChild(slot);
+        });
+
+        // Frame overlay
+        const frames = FRAMES_CONFIG[this.photoCount] || FRAMES_CONFIG[4];
+        const currentFrame = frames.find(f => f.id === this.selectedFrameId);
+
+        if (currentFrame && currentFrame.src) {
+          frameOverlay.src = currentFrame.src;
+          frameOverlay.onerror = () => { frameOverlay.src = currentFrame.altSrc; };
+          frameOverlay.classList.remove('hidden');
+          frameOverlay.style.mixBlendMode = currentFrame.isPng ? 'normal' : 'multiply';
+        } else {
+          frameOverlay.classList.add('hidden');
+          frameOverlay.src = '';
+        }
+
+        this.renderPlacedStickers();
+        this.renderPlacedTexts();
+      }
+
+      /* ─── Sticker Tray (ALL 173 stickers) ─── */
+      initStickerTray() {
+        const tray = document.getElementById('stickers-tray');
+        if (!tray) return;
+        tray.innerHTML = '';
+
+        ALL_STICKER_FILES.forEach(fileName => {
+          const thumb = document.createElement('div');
+          thumb.className = 'w-10 h-10 p-1 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 shadow-sm cursor-pointer hover:scale-110 transition flex items-center justify-center flex-shrink-0';
+          const primarySrc = `./public/Stickers/${fileName}`;
+          const fallbackSrc = `./Stickers/${fileName}`;
+          thumb.onclick = () => this.addStickerToStrip(primarySrc, fallbackSrc);
+          thumb.innerHTML = `<img src="${primarySrc}" onerror="this.src='${fallbackSrc}'; if(!this.dataset.tried){this.dataset.tried=1;}" class="w-full h-full object-contain" alt="sticker" loading="lazy">`;
+          tray.appendChild(thumb);
+        });
+      }
+
+      addStickerToStrip(primarySrc, fallbackSrc) {
+        sound.playClick();
+        const id = `s_${Date.now()}_${Math.random()}`;
+        this.placedStickers.push({ id, src: primarySrc, fallbackSrc: fallbackSrc || primarySrc, xPct: 50, yPct: 50, scale: 1, rot: 0 });
+        this.activeStickerId = id;
+        this.activeTextId = null;
+        this.renderPlacedStickers();
+        this.updateActiveStickerToolbar();
+      }
+
+      renderPlacedStickers() {
+        const layer = document.getElementById('placed-stickers-layer');
+        if (!layer) return;
+        layer.innerHTML = '';
+
+        this.placedStickers.forEach(s => {
+          const img = document.createElement('img');
+          img.src = s.src;
+          img.onerror = () => { img.src = s.fallbackSrc; };
+          img.className = `absolute pointer-events-auto cursor-grab select-none transition-transform ${s.id === this.activeStickerId ? 'ring-2 ring-[#9b3a3b] rounded-lg' : ''}`;
+          img.style.left = `${s.xPct}%`;
+          img.style.top = `${s.yPct}%`;
+          img.style.width = `${52 * s.scale}px`;
+          img.style.transform = `translate(-50%, -50%) rotate(${s.rot}deg)`;
+          img.onpointerdown = (e) => this.startDragging(e, s.id, 'sticker');
+          layer.appendChild(img);
+        });
+      }
+
+      scaleActiveSticker(delta) {
+        sound.playClick();
+        const s = this.placedStickers.find(item => item.id === this.activeStickerId);
+        if (!s) return;
+        s.scale = Math.max(0.4, Math.min(2.5, s.scale + delta));
+        this.renderPlacedStickers();
+      }
+
+      rotateActiveSticker(deg) {
+        sound.playClick();
+        const s = this.placedStickers.find(item => item.id === this.activeStickerId);
+        if (!s) return;
+        s.rot = (s.rot + deg) % 360;
+        this.renderPlacedStickers();
+      }
+
+      deleteActiveSticker() {
+        sound.playClick();
+        this.placedStickers = this.placedStickers.filter(s => s.id !== this.activeStickerId);
+        this.activeStickerId = null;
+        this.renderPlacedStickers();
+        this.updateActiveStickerToolbar();
+      }
+
+      updateActiveStickerToolbar() {
+        const bar = document.getElementById('sticker-active-actions');
+        if (!bar) return;
+        if (this.activeStickerId) { bar.classList.remove('hidden'); bar.classList.add('flex'); }
+        else { bar.classList.add('hidden'); bar.classList.remove('flex'); }
+      }
+
+      /* ─── Text Captions ─── */
+      addTextCaption(fontName) {
+        sound.playClick();
+        const id = `t_${Date.now()}`;
+        this.placedTexts.push({ id, text: 'Memory ✨', font: fontName, color: '#2a1a18', fontSize: 16, xPct: 50, yPct: 88, rot: 0 });
+        this.activeTextId = id;
+        this.activeStickerId = null;
+        this.renderPlacedTexts();
+        this.updateActiveTextToolbar();
+      }
+
+      renderPlacedTexts() {
+        const layer = document.getElementById('placed-text-layer');
+        if (!layer) return;
+        layer.innerHTML = '';
+
+        this.placedTexts.forEach(t => {
+          const div = document.createElement('div');
+          div.className = `absolute pointer-events-auto cursor-grab select-none whitespace-nowrap px-1.5 py-0.5 rounded ${t.id === this.activeTextId ? 'ring-2 ring-[#9b3a3b] bg-white/40' : ''}`;
+          div.style.left = `${t.xPct}%`;
+          div.style.top = `${t.yPct}%`;
+          div.style.fontFamily = `"${t.font}", cursive, sans-serif`;
+          div.style.color = t.color;
+          div.style.fontSize = `${t.fontSize}px`;
+          div.style.transform = `translate(-50%, -50%) rotate(${t.rot}deg)`;
+          div.innerText = t.text;
+          div.onpointerdown = (e) => this.startDragging(e, t.id, 'text');
+          layer.appendChild(div);
+        });
+      }
+
+      updateActiveText(val) {
+        const t = this.placedTexts.find(item => item.id === this.activeTextId);
+        if (!t) return;
+        t.text = val;
+        this.renderPlacedTexts();
+      }
+
+      updateActiveTextColor(hex) {
+        const t = this.placedTexts.find(item => item.id === this.activeTextId);
+        if (!t) return;
+        t.color = hex;
+        this.renderPlacedTexts();
+      }
+
+      rotateActiveText(deg) {
+        sound.playClick();
+        const t = this.placedTexts.find(item => item.id === this.activeTextId);
+        if (!t) return;
+        t.rot = (t.rot + deg) % 360;
+        this.renderPlacedTexts();
+      }
+
+      deleteActiveText() {
+        sound.playClick();
+        this.placedTexts = this.placedTexts.filter(t => t.id !== this.activeTextId);
+        this.activeTextId = null;
+        this.renderPlacedTexts();
+        this.updateActiveTextToolbar();
+      }
+
+      updateActiveTextToolbar() {
+        const bar = document.getElementById('text-edit-toolbar');
+        const input = document.getElementById('text-edit-input');
+        const color = document.getElementById('text-color-picker');
+        if (!bar) return;
+
+        const activeT = this.placedTexts.find(t => t.id === this.activeTextId);
+        if (activeT) {
+          bar.classList.remove('hidden');
+          if (input) input.value = activeT.text;
+          if (color) color.value = activeT.color;
+        } else {
+          bar.classList.add('hidden');
+        }
+      }
+
+      /* ─── Pointer Drag Engine ─── */
+      startDragging(e, id, type) {
+        e.stopPropagation();
+        const container = document.getElementById('composed-strip-container');
+        if (!container) return;
+
+        if (type === 'sticker') { this.activeStickerId = id; this.activeTextId = null; }
+        else { this.activeTextId = id; this.activeStickerId = null; }
+        this.updateActiveStickerToolbar();
+        this.updateActiveTextToolbar();
+        this.renderPlacedStickers();
+        this.renderPlacedTexts();
+
+        const moveHandler = (moveEvent) => {
+          const rect = container.getBoundingClientRect();
+          const xPct = Math.min(95, Math.max(5, ((moveEvent.clientX - rect.left) / rect.width) * 100));
+          const yPct = Math.min(95, Math.max(5, ((moveEvent.clientY - rect.top) / rect.height) * 100));
+
+          if (type === 'sticker') {
+            const item = this.placedStickers.find(s => s.id === id);
+            if (item) { item.xPct = xPct; item.yPct = yPct; this.renderPlacedStickers(); }
+          } else {
+            const item = this.placedTexts.find(t => t.id === id);
+            if (item) { item.xPct = xPct; item.yPct = yPct; this.renderPlacedTexts(); }
+          }
+        };
+
+        const upHandler = () => {
+          window.removeEventListener('pointermove', moveHandler);
+          window.removeEventListener('pointerup', upHandler);
+        };
+
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('pointerup', upHandler);
+      }
+
+      /* ─── High-Resolution Download ─── */
+      async downloadPhotostrip() {
+        sound.playClick();
+        const SCALE = 3;
+        const W = 280 * SCALE;
+        const count = this.photoCount;
+        const H = (count === 3 ? 660 : 680) * SCALE;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = this.stripColor;
+        this.roundRect(ctx, 0, 0, W, H, 16 * SCALE);
+        ctx.fill();
+
+        // Photo slots
+        const padSide = 14 * SCALE;
+        const padTop = 14 * SCALE;
+        const padBottom = 20 * SCALE;
+        const gap = 10 * SCALE;
+        const slotW = W - padSide * 2;
+        const availH = H - padTop - padBottom - gap * (count - 1);
+        const slotH = availH / count;
+
+        const photos = this.snaps.length > 0 ? this.snaps : Array(count).fill('');
+        for (let i = 0; i < count; i++) {
+          const sy = padTop + i * (slotH + gap);
+          if (photos[i]) {
+            const img = await this.loadImage(photos[i]);
+            ctx.save();
+            this.roundRect(ctx, padSide, sy, slotW, slotH, 10 * SCALE);
+            ctx.clip();
+            this.drawImageCover(ctx, img, padSide, sy, slotW, slotH);
+            ctx.restore();
+          } else {
+            ctx.fillStyle = '#f0f0f0';
+            this.roundRect(ctx, padSide, sy, slotW, slotH, 10 * SCALE);
+            ctx.fill();
+          }
+        }
+
+        // Frame overlay
+        const frames = FRAMES_CONFIG[this.photoCount] || FRAMES_CONFIG[4];
+        const currentFrame = frames.find(f => f.id === this.selectedFrameId);
+        if (currentFrame && currentFrame.src) {
+          try {
+            const frameImg = await this.loadImage(currentFrame.src);
+            ctx.drawImage(frameImg, 0, 0, W, H);
+          } catch(e) {
+            try { const alt = await this.loadImage(currentFrame.altSrc); ctx.drawImage(alt, 0, 0, W, H); } catch(err) {}
+          }
+        }
+
+        // Stickers
+        for (const s of this.placedStickers) {
+          try {
+            const img = await this.loadImage(s.src).catch(() => this.loadImage(s.fallbackSrc));
+            const size = 52 * SCALE * s.scale;
+            const cx = (s.xPct / 100) * W;
+            const cy = (s.yPct / 100) * H;
+            ctx.save(); ctx.translate(cx, cy); ctx.rotate((s.rot * Math.PI) / 180);
+            ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            ctx.restore();
+          } catch(e) {}
+        }
+
+        // Texts
+        for (const t of this.placedTexts) {
+          const cx = (t.xPct / 100) * W;
+          const cy = (t.yPct / 100) * H;
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate((t.rot * Math.PI) / 180);
+          ctx.fillStyle = t.color;
+          ctx.font = `bold ${t.fontSize * SCALE}px "${t.font}", cursive, sans-serif`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(t.text, 0, 0);
+          ctx.restore();
+        }
+
+        // Download
+        const link = document.createElement('a');
+        link.download = `quadshot-${count}-strip.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+
+      roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      drawImageCover(ctx, img, x, y, w, h) {
+        const imgRatio = img.width / img.height;
+        const boxRatio = w / h;
+        let dw, dh, dx, dy;
+        if (imgRatio > boxRatio) { dh = h; dw = h * imgRatio; dx = x - (dw - w) / 2; dy = y; }
+        else { dw = w; dh = w / imgRatio; dx = x; dy = y - (dh - h) / 2; }
+        ctx.drawImage(img, dx, dy, dw, dh);
+      }
+
+      loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = (e) => reject(e);
+          img.src = src;
+        });
+      }
+
+      /* ─── Contact Form ─── */
+      async handleContactSubmit(e) {
+        e.preventDefault();
+        sound.playClick();
+        const submitBtn = document.getElementById('btn-contact-submit');
+        const statusMsg = document.getElementById('contact-status-msg');
+        const name = document.getElementById('contact-name').value;
+        const email = document.getElementById('contact-email').value;
+        const message = document.getElementById('contact-msg').value;
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<span>Sending...</span> <i data-lucide="loader" class="w-4 h-4 animate-spin"></i>`;
+          if (window.lucide) window.lucide.createIcons();
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('name', name);
+          formData.append('email', email);
+          formData.append('message', message);
+          formData.append('access_key', 'acd8ae28-7623-4505-ab93-08996119c400');
+
+          const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData });
+          const data = await res.json();
+
+          if (statusMsg) {
+            statusMsg.classList.remove('hidden');
+            if (data.success) {
+              statusMsg.className = 'text-xs font-semibold rounded-xl p-2 text-center bg-emerald-100 text-emerald-800 border border-emerald-200';
+              statusMsg.innerText = '✅ Thank you! Your message has been sent.';
+              document.getElementById('contact-form').reset();
+            } else {
+              statusMsg.className = 'text-xs font-semibold rounded-xl p-2 text-center bg-amber-100 text-amber-800 border border-amber-200';
+              statusMsg.innerText = 'Feedback logged! Thanks for testing Quadshot.';
+            }
+          }
+        } catch (err) {
+          if (statusMsg) {
+            statusMsg.classList.remove('hidden');
+            statusMsg.className = 'text-xs font-semibold rounded-xl p-2 text-center bg-emerald-100 text-emerald-800 border border-emerald-200';
+            statusMsg.innerText = '✅ Thank you for your feedback!';
+            document.getElementById('contact-form').reset();
+          }
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>Send Message</span>`;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }
+      }
+
+      /* ─── About Slide Carousel ─── */
+      setAboutSlide(idx) {
+        sound.playClick();
+        this.aboutSlideIdx = idx;
+        const slide = ABOUT_SLIDES[idx];
+        const tag = document.getElementById('about-tag');
+        const title = document.getElementById('about-title');
+        const text = document.getElementById('about-text');
+        const caption = document.getElementById('about-slide-caption');
+        const img = document.getElementById('about-slide-img');
+
+        if (tag) tag.innerText = slide.tag;
+        if (title) title.innerText = slide.title;
+        if (text) text.innerText = slide.text;
+        if (caption) caption.innerText = slide.caption;
+        if (img) { img.src = slide.img; img.onerror = () => { img.src = slide.altImg; }; }
+
+        const dots = document.querySelectorAll('#about-dots button');
+        dots.forEach((d, i) => {
+          d.className = i === idx
+            ? 'w-2.5 h-2.5 rounded-full bg-[#9b3a3b] transition scale-125'
+            : 'w-2.5 h-2.5 rounded-full bg-stone-300 transition';
+        });
+      }
+
+      nextAboutSlide() { this.setAboutSlide((this.aboutSlideIdx + 1) % ABOUT_SLIDES.length); }
+      prevAboutSlide() { this.setAboutSlide((this.aboutSlideIdx - 1 + ABOUT_SLIDES.length) % ABOUT_SLIDES.length); }
+
+      /* ─── Bubble Letters ─── */
+      initBubbleLetters() {
+        const letters = document.querySelectorAll('.bubble-letter');
+        const title = document.getElementById('bubble-title');
+        if (!title) return;
+
+        letters.forEach((letter) => {
+          const idx = parseInt(letter.dataset.idx, 10);
+          letter.addEventListener('mouseenter', () => {
+            sound.playClick();
+            letters.forEach((l, i) => {
+              l.classList.remove('active', 'neighbour', 'far-neighbour');
+              const dist = Math.abs(i - idx);
+              if (dist === 0) l.classList.add('active');
+              else if (dist === 1) l.classList.add('neighbour');
+              else if (dist === 2) l.classList.add('far-neighbour');
+            });
+          });
+        });
+        title.addEventListener('mouseleave', () => {
+          letters.forEach(l => l.classList.remove('active', 'neighbour', 'far-neighbour'));
+        });
+      }
+    }
+
+    /* ═══ LAUNCH ═══ */
+    window.app = new PhotoboothApp();
+    document.addEventListener('DOMContentLoaded', () => { window.app.init(); });
+  </script>
+</body>
 </html>

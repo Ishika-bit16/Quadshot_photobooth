@@ -44,14 +44,17 @@ export default function Home() {
           </span>
         </div>
 
+        <span className="hero-tagline">Nostalgic Digital Photobooth</span>
+
         <div id="button_one">
           <button className="flip-btn" onClick={() => navigate('/Snaps')}>
-   
+              <div className="flip-front">
                 <span>Take a photo !</span>
-       
-      </button>
-    </div >     </div >
-    
+              </div>
+          </button>
+        </div >
+      </div >
+
     </>
   )
 }

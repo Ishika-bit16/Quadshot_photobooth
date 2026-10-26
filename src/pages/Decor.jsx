@@ -1,48 +1,41 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
 import { roundRect, drawImageCover, loadImage, toDataURL } from "./canvasHelpers.js";
 
 // Reference size of the photo strip (used for the PNG/SVG exports).
-// Kept local so this page has no dependency on Frame.jsx at all.
 const REF_W = 142
 const REF_H = 398
 
-// Just a color + label. No rotation, no decorations, no external data shape.
-const FRAME_COLORS = [
-  { id: 1, label: 'Maroon',   color: '#823A3A' },
-  { id: 2, label: 'Citrus',   color: '#ECFF81' },
-  { id: 3, label: 'Blossom',  color: '#FFDEF3' },
-  { id: 4, label: 'Noir',     color: '#000000' },
-  { id: 5, label: 'Slate',    color: '#6C6A6B' },
-  { id: 6, label: 'Petal',    color: '#FFDDDD' },
-  { id: 7, label: 'Sage',     color: '#DFF4A6' },
-  { id: 8, label: 'Rosewood', color: '#D67777' },
-  { id: 9, label: 'Dark blue',   color: '#003049' },
-  { id: 10, label: 'Brown',     color: '#432818' },
-  { id: 11, label: 'Lavender',color: '#E3D4FF' },
-  { id: 12, label: 'Berry',    color: '#a53860' },
+// ── Image-based frames (from public/Frames/) ──
+const FRAME_IMAGES = [
+  { id: 'none',   label: 'No Frame',       src: null },
+  { id: 'frame1', label: 'Classic Cream',   src: '/Frames/transparent-image.png' },
+  { id: 'frame2', label: 'Photo Studio',    src: '/Frames/transparent-image (1).png' },
+  { id: 'frame3', label: 'Polka Dots',      src: '/Frames/transparent-image (2).png' },
+  { id: 'frame4', label: 'Snap Express',    src: '/Frames/transparent-image (3).png' },
+  { id: 'frame5', label: 'Cute Dotted',     src: '/Frames/transparent-image (4).png' },
+  { id: 'frame6', label: 'Elegant',         src: '/Frames/transparent-image (5).png' },
+  { id: 'frame7', label: 'Vintage',         src: '/Frames/transparent-image (6).png' },
+  { id: 'frame8', label: 'Decorative',      src: '/Frames/transparent-image (7).png' },
 ]
 
-// Photo shapes. Each button shows a live preview of the shape itself
-// (via the same clip-path used on the real photos), so there's nothing
-// to keep in sync by hand.
-const PHOTO_SHAPES = [
-  { id: 'rect',     label: 'Rounded rectangle' },
-  { id: 'oval',     label: 'Oval' },
-  { id: 'heart',    label: 'Heart' },
-  { id: 'triangle', label: 'Triangle' },
-]
-
-// Fractional (0–1) heart outline, reused identically by the CSS clipPath
-// (objectBoundingBox units), the canvas export, and the SVG export — one
-// set of numbers, three renderers, so they always match.
+// Fractional (0–1) heart outline
 const HEART_FRACTION_PATH = 'M0.5,1 C-0.1,0.55 0.05,-0.05 0.5,0.28 C0.95,-0.05 1.1,0.55 0.5,1 Z'
 
 const STICKERS = ['/Stickers/png.svg', ...Array.from({ length: 167 }, (_, i) => `/Stickers/png-${i + 1}.svg`)]
-const STICKER_SIZE_PX = 56 // matches .placed-sticker default width used below
+const STICKER_SIZE_PX = 56
 
-// ── shape-aware clipping, self-contained so canvasHelpers.js is untouched ──
+// ── Draggable text fonts ──
+const TEXT_FONTS = [
+  { id: 'calligraphy', label: 'Calligraphy', family: "'Dancing Script', cursive" },
+  { id: 'bubbly',      label: 'Bubbly',      family: "'Bubblegum Sans', cursive" },
+  { id: 'curvy',       label: 'Curvy',        family: "'Pacifico', cursive" },
+  { id: 'arial',       label: 'Arial',        family: "Arial, sans-serif" },
+  { id: 'cursive',     label: 'Cursive',      family: "'Great Vibes', cursive" },
+]
+
+// ── shape-aware clipping ──
 function clipShapePath(ctx, shape, x, y, w, h) {
   ctx.beginPath()
   if (shape === 'oval') {
@@ -107,63 +100,100 @@ function shapeClipDefSVG(clipId, shape, x, y, w, h) {
   return `<clipPath id="${clipId}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/></clipPath>`
 }
 
+// ── Click sound utility ──
+const clickAudioCtx = typeof AudioContext !== 'undefined' ? new AudioContext() : null
+function playClickSound() {
+  if (!clickAudioCtx) return
+  const oscillator = clickAudioCtx.createOscillator()
+  const gainNode = clickAudioCtx.createGain()
+  oscillator.connect(gainNode)
+  gainNode.connect(clickAudioCtx.destination)
+  oscillator.frequency.setValueAtTime(800, clickAudioCtx.currentTime)
+  oscillator.type = 'sine'
+  gainNode.gain.setValueAtTime(0.3, clickAudioCtx.currentTime)
+  gainNode.gain.exponentialRampToValueAtTime(0.001, clickAudioCtx.currentTime + 0.08)
+  oscillator.start(clickAudioCtx.currentTime)
+  oscillator.stop(clickAudioCtx.currentTime + 0.08)
+}
+
 export default function Decor() {
   const navigate  = useNavigate()
   const location  = useLocation()
   const composedRef = useRef(null)
   const draggingId  = useRef(null)
+  const draggingTextId = useRef(null)
 
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Captured ONCE on mount into local state, so it can never be wiped out
-  // later by setSearchParams() (which navigates internally and, unless told
-  // otherwise, drops location.state).
   const [snaps] = useState(() => location.state?.snaps || [])
 
   useEffect(() => {
     if (snaps.length === 0) navigate('/snap', { replace: true })
   }, [snaps, navigate])
 
-  const initialFrameId = Number(searchParams.get('frame')) || FRAME_COLORS[0].id
-  const [selectedFrameId, setSelectedFrameId] = useState(initialFrameId)
-  const selectedFrame = FRAME_COLORS.find(f => f.id === selectedFrameId) || FRAME_COLORS[0]
+  // ── Frame image selection ──
+  const [selectedFrameId, setSelectedFrameId] = useState('none')
+  const selectedFrame = FRAME_IMAGES.find(f => f.id === selectedFrameId) || FRAME_IMAGES[0]
 
-  const [photoShape, setPhotoShape] = useState('rect') // 'rect' | 'oval' | 'heart' | 'triangle'
+  // ── Frame color (color wheel for the strip background) ──
+  const [frameColor, setFrameColor] = useState('#FFFFFF')
 
-  const [placedStickers,   setPlacedStickers]   = useState([]) // {id, src, xPct, yPct, rot, scale}
+  // ── Photo shape is now just 'rect' (shapes removed, replaced by frame color picker) ──
+  const [photoShape, setPhotoShape] = useState('rect')
+
+  const [placedStickers,   setPlacedStickers]   = useState([])
   const [selectedStickerId, setSelectedStickerId] = useState(null)
   const [isExporting, setIsExporting] = useState(false)
 
-  // ── frame color selection ──
-  const pickFrame = (id) => {
+  // ── Draggable text items ──
+  const [placedTexts, setPlacedTexts] = useState([])
+  const [selectedTextId, setSelectedTextId] = useState(null)
+
+  // ── Button click with sound ──
+  const withClick = (fn) => (...args) => {
+    playClickSound()
+    return fn(...args)
+  }
+
+  // ── frame image selection ──
+  const pickFrame = withClick((id) => {
     setSelectedFrameId(id)
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
       next.set('frame', id)
       return next
     }, { replace: true, state: location.state })
-  }
+  })
 
   // ── sticker placement ──
-  const addSticker = (src) => {
-    const id = `${Date.now()}-${Math.random()}`
+  const addSticker = withClick((src) => {
+    const id = `sticker-${Date.now()}-${Math.random()}`
     setPlacedStickers(prev => [...prev, { id, src, xPct: 50, yPct: 50, rot: 0, scale: 1 }])
     setSelectedStickerId(id)
-  }
+  })
 
-  const rotateSticker = (delta) => {
+  const rotateSticker = withClick((delta) => {
     setPlacedStickers(prev => prev.map(s => s.id === selectedStickerId ? { ...s, rot: s.rot + delta } : s))
-  }
+  })
 
-  const deleteSelectedSticker = () => {
+  const resizeSticker = withClick((delta) => {
+    setPlacedStickers(prev => prev.map(s => {
+      if (s.id !== selectedStickerId) return s
+      const newScale = Math.max(0.3, Math.min(3, s.scale + delta))
+      return { ...s, scale: newScale }
+    }))
+  })
+
+  const deleteSelectedSticker = withClick(() => {
     setPlacedStickers(prev => prev.filter(s => s.id !== selectedStickerId))
     setSelectedStickerId(null)
-  }
+  })
 
   const handlePointerDown = (e, id) => {
     e.stopPropagation()
     draggingId.current = id
     setSelectedStickerId(id)
+    setSelectedTextId(null)
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
@@ -177,7 +207,47 @@ export default function Decor() {
 
   const handlePointerUp = () => { draggingId.current = null }
 
-  // ── build the composited canvas (shared by the PNG download) ──
+  // ── Draggable text handlers ──
+  const addText = withClick((fontId) => {
+    const font = TEXT_FONTS.find(f => f.id === fontId)
+    const id = `text-${Date.now()}-${Math.random()}`
+    setPlacedTexts(prev => [...prev, {
+      id, text: 'Your Text', fontFamily: font.family, fontId: font.id,
+      xPct: 50, yPct: 85, color: '#ffffff', fontSize: 14, rot: 0
+    }])
+    setSelectedTextId(id)
+  })
+
+  const handleTextPointerDown = (e, id) => {
+    e.stopPropagation()
+    draggingTextId.current = id
+    setSelectedTextId(id)
+    setSelectedStickerId(null)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  const handleTextPointerMove = (e, id) => {
+    if (draggingTextId.current !== id || !composedRef.current) return
+    const rect = composedRef.current.getBoundingClientRect()
+    const xPct = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100))
+    const yPct = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100))
+    setPlacedTexts(prev => prev.map(t => t.id === id ? { ...t, xPct, yPct } : t))
+  }
+
+  const handleTextPointerUp = () => { draggingTextId.current = null }
+
+  const updateSelectedText = (key, value) => {
+    setPlacedTexts(prev => prev.map(t => t.id === selectedTextId ? { ...t, [key]: value } : t))
+  }
+
+  const deleteSelectedText = withClick(() => {
+    setPlacedTexts(prev => prev.filter(t => t.id !== selectedTextId))
+    setSelectedTextId(null)
+  })
+
+  const selectedText = placedTexts.find(t => t.id === selectedTextId)
+
+  // ── build the composited canvas ──
   const renderCanvas = async () => {
     const SCALE = 3
     const W = REF_W * SCALE
@@ -187,7 +257,8 @@ export default function Decor() {
     canvas.height = H
     const ctx = canvas.getContext('2d')
 
-    ctx.fillStyle = selectedFrame.color
+    // Draw frame color background
+    ctx.fillStyle = frameColor
     roundRect(ctx, 0, 0, W, H, 18 * SCALE)
     ctx.fill()
 
@@ -203,6 +274,13 @@ export default function Decor() {
       drawShapedImageCover(ctx, img, padSide, sy, slotW, slotH, photoShape)
     }
 
+    // Draw frame overlay image if selected
+    if (selectedFrame.src) {
+      const frameImg = await loadImage(selectedFrame.src)
+      ctx.drawImage(frameImg, 0, 0, W, H)
+    }
+
+    // Draw stickers
     for (const s of placedStickers) {
       const img = await loadImage(s.src)
       const size = STICKER_SIZE_PX * SCALE * s.scale
@@ -215,11 +293,26 @@ export default function Decor() {
       ctx.restore()
     }
 
+    // Draw text items
+    for (const t of placedTexts) {
+      const cx = (t.xPct / 100) * W
+      const cy = (t.yPct / 100) * H
+      ctx.save()
+      ctx.translate(cx, cy)
+      ctx.rotate((t.rot * Math.PI) / 180)
+      ctx.fillStyle = t.color
+      ctx.font = `${t.fontSize * SCALE}px ${t.fontFamily}`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(t.text, 0, 0)
+      ctx.restore()
+    }
+
     return canvas
   }
 
-  // ── download #1: composited PNG ──
-  const downloadPNG = async () => {
+  // ── Single download button ──
+  const downloadImage = withClick(async () => {
     setIsExporting(true)
     try {
       const canvas = await renderCanvas()
@@ -230,102 +323,13 @@ export default function Decor() {
     } finally {
       setIsExporting(false)
     }
-  }
+  })
 
-  // ── download #2: composited SVG (photos + stickers, fully embedded) ──
-  const downloadSVG = async () => {
-    setIsExporting(true)
-    try {
-      const W = REF_W, H = REF_H
-      const bg = selectedFrame.color
-      const padTop = 10, padSide = 10, padBottom = 14, gap = 8
-      const slotW = W - padSide * 2
-      const n = snaps.length || 1
-      const availH = H - padTop - padBottom - gap * (n - 1)
-      const slotH = availH / n
-
-      let defs = ''
-      let body = ''
-
-      snaps.forEach((src, i) => {
-        const sy = padTop + i * (slotH + gap)
-        const clipId = `photoClip${i}`
-        defs += shapeClipDefSVG(clipId, photoShape, padSide, sy, slotW, slotH)
-        body += `<image href="${src}" x="${padSide}" y="${sy}" width="${slotW}" height="${slotH}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`
-      })
-
-      for (const s of placedStickers) {
-        const dataUrl = await toDataURL(s.src)
-        const size = STICKER_SIZE_PX * s.scale
-        const cx = (s.xPct / 100) * W
-        const cy = (s.yPct / 100) * H
-        const x = cx - size / 2
-        const y = cy - size / 2
-        body += `<image href="${dataUrl}" x="${x}" y="${y}" width="${size}" height="${size}" transform="rotate(${s.rot} ${cx} ${cy})"/>`
-      }
-
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-        <defs>${defs}</defs>
-        <rect width="${W}" height="${H}" rx="18" fill="${bg}"/>
-        ${body}
-      </svg>`
-
-      const blob = new Blob([svg], { type: 'image/svg+xml' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'quadshot-strip.svg'
-      link.click()
-      URL.revokeObjectURL(url)
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
-  // ── download #3: just the placed stickers, transparent background ──
-  const downloadStickers = async () => {
-    if (placedStickers.length === 0) {
-      alert('Add some stickers first!')
-      return
-    }
-    setIsExporting(true)
-    try {
-      const SCALE = 3
-      const W = REF_W * SCALE
-      const H = REF_H * SCALE
-      const canvas = document.createElement('canvas')
-      canvas.width = W
-      canvas.height = H
-      const ctx = canvas.getContext('2d') // left transparent, no background fill
-
-      for (const s of placedStickers) {
-        const img = await loadImage(s.src)
-        const size = STICKER_SIZE_PX * SCALE * s.scale
-        const cx = (s.xPct / 100) * W
-        const cy = (s.yPct / 100) * H
-        ctx.save()
-        ctx.translate(cx, cy)
-        ctx.rotate((s.rot * Math.PI) / 180)
-        ctx.drawImage(img, -size / 2, -size / 2, size, size)
-        ctx.restore()
-      }
-
-      const link = document.createElement('a')
-      link.href = canvas.toDataURL('image/png')
-      link.download = 'quadshot-stickers.png'
-      link.click()
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
-  if (snaps.length === 0) return null // redirecting to /snap
+  if (snaps.length === 0) return null
 
   return (
     <div id="decor">
-      {/* Hidden shape defs, reused by both the shape-picker swatches and
-          the actual photos via CSS `clip-path: url(#shape-x)`.
-          objectBoundingBox units mean these auto-scale to any element size. */}
+      {/* Hidden shape defs for CSS clip-path */}
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
         <defs>
           <clipPath id="shape-oval" clipPathUnits="objectBoundingBox">
@@ -352,8 +356,8 @@ export default function Decor() {
           <div
             className="composed-strip"
             ref={composedRef}
-            style={{ '--frame-color': selectedFrame.color, background: selectedFrame.color }}
-            onClick={() => setSelectedStickerId(null)}
+            style={{ '--frame-color': frameColor, background: frameColor, position: 'relative' }}
+            onClick={() => { setSelectedStickerId(null); setSelectedTextId(null) }}
           >
             {snaps.map((src, i) => (
               <div key={i} className="composed-slot" data-shape={photoShape}>
@@ -361,6 +365,26 @@ export default function Decor() {
               </div>
             ))}
 
+            {/* Frame overlay image */}
+            {selectedFrame.src && (
+              <img
+                src={selectedFrame.src}
+                alt="frame overlay"
+                className="frame-overlay-image"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'fill',
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                  borderRadius: '18px',
+                }}
+              />
+            )}
+
+            {/* Placed stickers */}
             {placedStickers.map(s => (
               <img
                 key={s.id}
@@ -372,6 +396,7 @@ export default function Decor() {
                   top: `${s.yPct}%`,
                   width: `${STICKER_SIZE_PX * s.scale}px`,
                   transform: `translate(-50%, -50%) rotate(${s.rot}deg)`,
+                  zIndex: 15,
                 }}
                 onPointerDown={(e) => handlePointerDown(e, s.id)}
                 onPointerMove={(e) => handlePointerMove(e, s.id)}
@@ -379,54 +404,130 @@ export default function Decor() {
                 onClick={(e) => e.stopPropagation()}
               />
             ))}
+
+            {/* Placed text items */}
+            {placedTexts.map(t => (
+              <div
+                key={t.id}
+                className={`placed-text${t.id === selectedTextId ? ' selected-text' : ''}`}
+                style={{
+                  position: 'absolute',
+                  left: `${t.xPct}%`,
+                  top: `${t.yPct}%`,
+                  transform: `translate(-50%, -50%) rotate(${t.rot}deg)`,
+                  fontFamily: t.fontFamily,
+                  fontSize: `${t.fontSize}px`,
+                  color: t.color,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  touchAction: 'none',
+                  zIndex: 20,
+                  whiteSpace: 'nowrap',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                }}
+                onPointerDown={(e) => handleTextPointerDown(e, t.id)}
+                onPointerMove={(e) => handleTextPointerMove(e, t.id)}
+                onPointerUp={handleTextPointerUp}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {t.text}
+              </div>
+            ))}
           </div>
 
-          {/* everything to the right of the photo strip */}
+          {/* Controls on the right */}
           <div className="decor-controls">
 
-            {/* frame color picker */}
+            {/* Frame image picker */}
             <section className="control-block">
-              <h3 className="control-label">Frame color</h3>
-              <div className="frame-picker-row">
-                {FRAME_COLORS.map(f => (
+              <h3 className="control-label">Frames</h3>
+              <div className="frame-picker-row frame-image-picker">
+                {FRAME_IMAGES.map(f => (
                   <button
                     type="button"
                     key={f.id}
-                    className={`frame-thumb-mini${selectedFrame.id === f.id ? ' active' : ''}`}
-                    style={{ background: f.color }}
+                    className={`frame-img-thumb${selectedFrame.id === f.id ? ' active' : ''}`}
                     title={f.label}
                     onClick={() => pickFrame(f.id)}
                   >
+                    {f.src ? (
+                      <img src={f.src} alt={f.label} />
+                    ) : (
+                      <span className="no-frame-icon">✕</span>
+                    )}
                     {selectedFrame.id === f.id && <span className="frame-check">✓</span>}
                   </button>
                 ))}
               </div>
             </section>
 
-            {/* photo shape picker */}
+            {/* Frame color (color wheel) */}
             <section className="control-block">
-              <h3 className="control-label">Photo shape</h3>
-              <div className="shape-picker-row">
-                {PHOTO_SHAPES.map(s => (
-                  <button
-                    type="button"
-                    key={s.id}
-                    className={`shape-thumb-mini${photoShape === s.id ? ' active' : ''}`}
-                    title={s.label}
-                    onClick={() => setPhotoShape(s.id)}
-                  >
-                    <span className="shape-swatch" data-shape={s.id} />
-                  </button>
-                ))}
+              <h3 className="control-label">Frame Color</h3>
+              <div className="color-wheel-row">
+                <input
+                  type="color"
+                  value={frameColor}
+                  onChange={(e) => { playClickSound(); setFrameColor(e.target.value) }}
+                  className="color-wheel-input"
+                  title="Pick frame color"
+                />
+                <span className="color-hex-label">{frameColor.toUpperCase()}</span>
               </div>
             </section>
 
-            {/* stickers — always visible, scrollable grid */}
+            {/* Add Text */}
+            <section className="control-block">
+              <h3 className="control-label">Add Text</h3>
+              <div className="text-font-row">
+                {TEXT_FONTS.map(font => (
+                  <button
+                    type="button"
+                    key={font.id}
+                    className="text-font-btn"
+                    style={{ fontFamily: font.family }}
+                    title={font.label}
+                    onClick={() => addText(font.id)}
+                  >
+                    {font.label}
+                  </button>
+                ))}
+              </div>
+              {selectedText && (
+                <div className="text-edit-controls">
+                  <input
+                    type="text"
+                    value={selectedText.text}
+                    onChange={(e) => updateSelectedText('text', e.target.value)}
+                    className="text-edit-input"
+                    placeholder="Enter text..."
+                  />
+                  <div className="text-edit-row">
+                    <input
+                      type="color"
+                      value={selectedText.color}
+                      onChange={(e) => updateSelectedText('color', e.target.value)}
+                      className="text-color-input"
+                      title="Text color"
+                    />
+                    <button type="button" className="sticker-ctrl-btn" onClick={withClick(() => updateSelectedText('fontSize', Math.max(8, selectedText.fontSize - 2)))} title="Smaller text">A−</button>
+                    <button type="button" className="sticker-ctrl-btn" onClick={withClick(() => updateSelectedText('fontSize', Math.min(40, selectedText.fontSize + 2)))} title="Larger text">A+</button>
+                    <button type="button" className="sticker-ctrl-btn" onClick={withClick(() => updateSelectedText('rot', selectedText.rot - 15))} title="Rotate left">⟲</button>
+                    <button type="button" className="sticker-ctrl-btn" onClick={withClick(() => updateSelectedText('rot', selectedText.rot + 15))} title="Rotate right">⟳</button>
+                    <button type="button" className="sticker-ctrl-btn sticker-del-btn" onClick={deleteSelectedText} title="Remove text">✕</button>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* Stickers */}
             <section className="control-block">
               <div className="sticker-header-row">
                 <h3 className="control-label">Stickers</h3>
                 {selectedStickerId && (
                   <div className="sticker-inline-actions">
+                    <button type="button" className="sticker-ctrl-btn" onClick={() => resizeSticker(-0.15)} title="Decrease size">➖</button>
+                    <button type="button" className="sticker-ctrl-btn" onClick={() => resizeSticker(0.15)} title="Increase size">➕</button>
                     <button type="button" className="sticker-ctrl-btn" onClick={() => rotateSticker(-15)} title="Rotate left">⟲</button>
                     <button type="button" className="sticker-ctrl-btn" onClick={() => rotateSticker(15)} title="Rotate right">⟳</button>
                     <button type="button" className="sticker-ctrl-btn sticker-del-btn" onClick={deleteSelectedSticker} title="Remove sticker">✕</button>
@@ -445,18 +546,18 @@ export default function Decor() {
               </div>
             </section>
 
-            {/* downloads */}
+            {/* Download + Back to Camera */}
             <section className="control-block">
-              <h3 className="control-label">Download</h3>
-              <div className="sticker-controls download-row">
-                <button type="button" className="cursor-box dl-btn" onClick={downloadPNG} disabled={isExporting}>Download PNG</button>
-                   <button type="button" className="cursor-box dl-btn" onClick={downloadStickers} disabled={isExporting}>Download Stickers</button>
+              <div className="download-back-row">
+                <button type="button" className="cursor-box dl-btn" onClick={downloadImage} disabled={isExporting}>
+                  Download
+                </button>
+                <button type="button" className="retake-btn" onClick={withClick(() => navigate('/Snaps'))}>
+                  Back to Camera →
+                </button>
               </div>
             </section>
 
-            <div className="sticker-controls">
-              <button type="button" className="retake-btn" onClick={() => navigate('/Snaps')}>← Back to Camera</button>
-            </div>
           </div>
         </div>
       </div>

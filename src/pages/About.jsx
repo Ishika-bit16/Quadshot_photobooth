@@ -54,8 +54,6 @@ export default function About() {
     <div className="page-container about-page-container">
       <Navbar />
       <div className="section-wrap" id="about" ref={wrapRef}>
-        <h2 className="section-title">ABOUT</h2>
-
         <div className="about-lavender-card">
           <img src="/Stickers/qs-bow.png" alt="Ribbon Bow" className="card-sticker-bow" />
           <img src="/Stickers/qs-lock.png" alt="Heart Lock" className="card-sticker-lock" />

@@ -88,7 +88,7 @@ export default function Snaps() {
     const runNextShot = () => {
       if (shotsTaken >= TOTAL_SHOTS) {
         setIsCounting(false)
-        setCountdown({ label: 'Done! 🎞️', number: '' })
+        setCountdown({ label: 'Done!', number: '' })
         setTimeout(() => setCountdown(null), 1200)
         return
       }

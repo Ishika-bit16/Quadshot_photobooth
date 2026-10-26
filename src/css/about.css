@@ -21,28 +21,13 @@
   font-family: 'Playfair Display', serif;
 }
 
-/* ── title: wide-spaced serif with thin underline ── */
-#about .section-title {
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
-  font-size: clamp(1.6rem, 4.1vw, 2.5rem);
-  letter-spacing: .24em;
-  text-indent: .24em;               /* keeps the tracked text optically centred */
-  color: var(--ab-dark);
-  
-  border-bottom: 1px solid rgba(107, 31, 36, .16);
-  margin-bottom: 1rem;
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1);
-}
-#about.in .section-title { opacity: 1; transform: none; }
+#about.in { opacity: 1; transform: none; }
 
 /* ── the card ── */
 .about-lavender-card {
   position: relative;
   width: min(820px, 100%);
-  
+  margin-top: 2.5rem;
   background: #FFC8C8;
   padding: 2rem 2rem 1rem;
   border: 1.5px solid #fff;
@@ -206,41 +191,6 @@
 }
 .slide-dot.active { width: 26px; background: #ffff; }
 
-.about-bottom-row {
-  width: min(820px, 100%);
-  display: grid;
-  grid-template-columns: 140px 1fr 120px;
-  gap: 1.5rem;
-  align-items: center;
-  margin-top: 2.5rem;
-}
-
-.about-bottom-photostrips {
-  width: 120px;
-  justify-self: center;
-  filter: drop-shadow(0 8px 10px rgba(120, 50, 50, .2));
-}
-
-.about-bottom-text {
-  padding: 1rem 1.3rem;
-  background: rgba(255, 255, 255, .55);
-  border: 1px solid rgba(255, 255, 255, .8);
-  border-radius: 18px;
-  box-shadow: 0 6px 16px rgba(154, 57, 56, .08);
-}
-
-.about-bottom-text p {
-  color: var(--ab-text);
-  font-family: 'Playfair Display', serif;
-  font-size: .95rem;
-  line-height: 1.55;
-  margin: 0;
-}
-
-.about-girl-sticker-slot {
-  min-height: 100px;
-}
-
 @media (max-width: 700px) {
   #about.section-wrap {
     width: calc(100% - 2rem);
@@ -255,12 +205,4 @@
     gap: 1.5rem;
   }
 
-  .about-bottom-row {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .about-girl-sticker-slot {
-    display: none;
-  }
 }
